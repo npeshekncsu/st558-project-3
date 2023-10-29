@@ -1,0 +1,246 @@
+---
+title: "ST558, Project3"
+author: "Nataliya Peshekhodko"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+## Packages
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(corrplot)
+library(caret)
+library(Metrics)
+```
+
+
+## Data
+
+```{r, warning=FALSE, message=FALSE}
+data = read_csv('./data/diabetes_binary_health_indicators_BRFSS2015.csv')
+#str(data)
+```
+
+
+
+
+```{r}
+sum(is.na(data))
+head(data)
+```
+
+
+
+```{r}
+transformed <- data %>%
+  mutate (Education = if_else(Education == 1 | Education == 2, 12, Education))
+#transformed$Diabetes_binary = as.factor(transformed$Diabetes_binary)
+str(transformed)
+```
+
+
+
+```{r}
+education_level=12
+
+subset <- transformed %>%
+  filter(Education == education_level)
+```
+
+
+Variables in data set:
+
+  - **Diabetes_binary** - 0 = no diabetes, 1 = diabetes
+  - **HighBP** - 0 = no high blood pressure, 1 = high blood pressure
+  - **HighChol** - 0 = no high cholesterol, 1 = high cholesterol
+  - **CholCheck** - 0 = no cholesterol check in 5 years,  1 = yes cholesterol check in 5 years
+  - **BMI** - Body Mass Index
+  - **Smoker** - Have you smoked at least 100 cigarettes in your entire life? [Note: 5 packs = 100 cigarettes] 0 = no, 1 = yes
+  - **Stroke** - (Ever told) you had a stroke. 0 = no,  1 = yes
+  - **HeartDiseaseorAttack** - Coronary heart disease (CHD) or myocardial infarction (MI), 0 = no, 1 = yes
+  - **PhysActivity** - Physical activity in past 30 days - not including job,  0 = no, 1 = yes
+  - **Fruits** - Consume Fruit 1 or more times per day, 0 = no, 1 = yes
+  - **Veggies** - Consume Vegetables 1 or more times per day, 0 = no 1 = yes
+  - **HvyAlcoholConsump** - Heavy drinkers (adult men having more than 14 drinks per week and adult women having more than 7 drinks per week) 0 = no
+  - **AnyHealthcare** - Have any kind of health care coverage, including health insurance, prepaid plans such as HMO, etc. 0 = no 1 = yes
+  - **NoDocbcCost** - Was there a time in the past 12 months when you needed to see a doctor but could not because of cost? 0 = no 1 = yes
+  - **GenHlth** - Would you say that in general your health is: scale 1-5 1 = excellent 2 = very good 3 = good 4 = fair 5 = poor
+  - **MentHlth** - Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how 
+  - **PhysHlth** - Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 
+  - **DiffWalk** - Do you have serious difficulty walking or climbing stairs? 0 = no, 1 = yes
+  - **Sex** - 0 = female,  1 = male
+  - **Age** - 13-level age category, 1 = 18-24, 9 = 60-64,  13 = 80 or older
+  - **Education** - Education level scale 1-6, 1 = Never attended school or only kindergarten,  2 = Grades 1 through 8
+  - **Income** - Income scale scale 1-8,  1 = less than 10,000 dol,  5 = less than 35,000 dol,  8 = 75,000 dol or more
+  
+
+```{r}
+names = c('HighBP' ,'HighChol', 
+          'CholCheck', 'Smoker', 
+          'Diabetes_binary', 'Stroke',
+          'HeartDiseaseorAttack', 'PhysActivity',
+          'Fruits', 'Veggies', 
+          'HvyAlcoholConsump', 'Sex',
+          'Age', 'Income')
+subset[,names] = lapply(subset[,names] , factor)
+str(subset)
+```
+
+## Explanatory Data Analysis
+
+
+```{r}
+table(subset$Diabetes_binary)
+```
+
+```{r, message=FALSE}
+ggplot(data = subset, aes(x = Age)) +
+  geom_histogram()
+```
+
+```{r}
+table(subset$Diabetes_binary, subset$Age)
+```
+
+```{r}
+table(subset$Diabetes_binary, subset$Sex)
+```
+
+
+```{r}
+#data <- as.matrix(all %>% select(aqius, aqicn, temp_cels, humidity, wind_speed, atm_pressure))
+#cor(as.matrix(subset %>% select(-Education)))
+
+corrplot(cor(as.matrix(subset %>% select(-Education))), 
+         type="upper", 
+         #method = "number",
+         tl.pos = "lt")
+```
+
+```{r}
+table(subset$Diabetes_binary, subset$GenHlth)
+```
+
+```{r}
+table(subset$Diabetes_binary, subset$HighBP)
+```
+
+```{r}
+table(subset$Diabetes_binary, subset$HighChol)
+```
+
+```{r}
+#subset$Diabetes_binary = as_factor(subset$Diabetes_binary)
+
+#ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Diabetes_binary))) +
+ggplot(subset, aes(x = Diabetes_binary, y = BMI, fill = Diabetes_binary)) +
+  geom_boxplot() +
+  labs(title = "AQIUS values distribution per country", x = "Country", y = "AQIUS") #+
+  #theme_minimal()
+```
+
+
+
+## Modeling
+
+```{r}
+#data$Diabetes_binary = as_factor(data$Diabetes_binary)
+```
+
+Spiting up data training and validation data sets.
+
+```{r}
+#subset$Diabetes_binary = as_factor(subset$Diabetes_binary)
+
+set.seed(5)
+trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7, 
+                                  list = FALSE, 
+                                  times = 1)
+train_data = subset[trainIndex, ]
+val_data = subset[-trainIndex, ]
+```
+
+
+### Log loss
+
+**Log loss**, also known as **logarithmic loss** or **cross-entropy loss**, is a common evaluation metric for binary classification models. It measures the performance of a model by quantifying the difference between predicted probabilities and actual values. Log-loss is indicative of how close the prediction probability is to the corresponding actual/true value, penalizing inaccurate predictions with higher values. Lower log-loss indicates better model performance.
+
+
+  
+Mathematical interpretation: Log Loss is the negative average of the log of corrected predicted probabilities for each instance.
+
+$$log \ loss = -\frac{1}{N} \sum_{i=1}^N y_i log(p(y_i)) + (1-y_i)log(1-p(y_i))$$
+
+$p(y_i)$ is the probability of $1$.
+$1-p(y_i)$ is the probability of 0.
+
+
+### Logistic regression
+
+Logistic regression is a statistical and machine learning model used for binary classification tasks. It's a type of regression analysis that's well-suited for predicting the probability of an observation belonging to one of two classes or categories.
+
+
+  - Logistic regression is used when the response variable is binary, meaning it has two possible outcomes or classes. 
+  - Logistic regression uses the sigmoid function to model the relationship between the features and the probability of the binary outcome. The logistic function has an S-shaped curve and maps any real-valued number to a value between 0 and 1. $p(x)=\frac{1}{1+e^{-(\beta_0+\beta_1x)}}$. ($p(x)$ is the probability of the dependent variable being 1)
+  - The goal of logistic regression is to find the best-fitting model by estimating the coefficients $\beta_0$, $\beta_1$.
+  This is typically done using a process called maximum likelihood estimation. The coefficients are adjusted to maximize the likelihood of the observed data given the model.
+  
+
+#### Logistic regression model 1 - HighChol, BMI and GenHlth (no interactions, first order)
+
+```{r}
+train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
+val_data$Diabetes_binary_transformed = val_data$Diabetes_binary
+
+levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Diabetes_binary_transformed))
+
+levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
+```
+
+
+Calculate log loss for train data. 
+
+```{r}
+train_predictions = predict(lr_model_1, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+```
+
+
+
+
+```{r}
+calculateLogLoss <- function(predicted_probabilities, true_labels) {
+
+  # Avoid log(0) or log(1) which can lead to NaN or Inf values
+  predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
+                                 1e-15)
+
+  log_loss <- -mean(true_labels * log(predicted_probabilities) + 
+                      (1 - true_labels) * log(1 - predicted_probabilities))
+  return(log_loss)
+}
+```
+
+
+
+
+
+```{r}
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss))
+```
+
+
