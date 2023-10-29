@@ -83,17 +83,7 @@ Variables in data set:
   - **Income** - Income scale scale 1-8,  1 = less than 10,000 dol,  5 = less than 35,000 dol,  8 = 75,000 dol or more
   
 
-```{r}
-names = c('HighBP' ,'HighChol', 
-          'CholCheck', 'Smoker', 
-          'Diabetes_binary', 'Stroke',
-          'HeartDiseaseorAttack', 'PhysActivity',
-          'Fruits', 'Veggies', 
-          'HvyAlcoholConsump', 'Sex',
-          'Age', 'Income')
-subset[,names] = lapply(subset[,names] , factor)
-str(subset)
-```
+
 
 ## Explanatory Data Analysis
 
@@ -142,7 +132,7 @@ table(subset$Diabetes_binary, subset$HighChol)
 #subset$Diabetes_binary = as_factor(subset$Diabetes_binary)
 
 #ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Diabetes_binary))) +
-ggplot(subset, aes(x = Diabetes_binary, y = BMI, fill = Diabetes_binary)) +
+ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Diabetes_binary))) +
   geom_boxplot() +
   labs(title = "AQIUS values distribution per country", x = "Country", y = "AQIUS") #+
   #theme_minimal()
@@ -151,6 +141,19 @@ ggplot(subset, aes(x = Diabetes_binary, y = BMI, fill = Diabetes_binary)) +
 
 
 ## Modeling
+
+
+```{r}
+names = c('HighBP' ,'HighChol', 
+          'CholCheck', 'Smoker', 
+          'Diabetes_binary', 'Stroke',
+          'HeartDiseaseorAttack', 'PhysActivity',
+          'Fruits', 'Veggies', 
+          'HvyAlcoholConsump', 'Sex',
+          'Age','Income')
+subset[,names] = lapply(subset[,names] , factor)
+str(subset)
+```
 
 ```{r}
 #data$Diabetes_binary = as_factor(data$Diabetes_binary)
@@ -207,20 +210,49 @@ levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabet
 ```
 
 
-Calculate log loss for train data. 
+
 
 ```{r}
-train_predictions = predict(lr_model_1, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
-                             type = "prob")
+train.control <- trainControl(method = "repeatedcv", 
+                              number = 5, 
+                              repeats = 10,
+                              summaryFunction=mnLogLoss,
+                              classProbs = TRUE)
+
+#train_data$HighChol = as_factor(train_data$HighChol)
+#train_data$GenHlth = as_factor(train_data$GenHlth)
+
+set.seed(83)
+lr_model_1 <- train(Diabetes_binary_transformed ~ 
+                                   HighChol+
+                                   BMI + 
+                                   GenHlth, 
+                                 data = train_data,
+                                 method = "glm", 
+                                 family="binomial",
+                                 metric="logLoss",
+                                 trControl = train.control
+                                )
+summary(lr_model_1)
 ```
 
 
+Calculate log loss for train data. 
+
+```{r}
+
+```
+
+```{r}
+str(train_data)
+```
 
 
 ```{r}
 calculateLogLoss <- function(predicted_probabilities, true_labels) {
-
+  #log_loss = -mean(true_labels * log(predicted_probabilities) + 
+  #                   (1 - true_labels) * log(1 - predicted_probabilities))
+  #return(log_loss)
   # Avoid log(0) or log(1) which can lead to NaN or Inf values
   predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
                                  1e-15)
@@ -236,11 +268,25 @@ calculateLogLoss <- function(predicted_probabilities, true_labels) {
 
 
 ```{r}
+train_predictions = predict(lr_model_1, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
 predicted_prob_class1 = train_predictions[, 1]
 true_labels = as.numeric(train_data$Diabetes_binary)
 
-log_loss = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss))
+log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_lr_model_1))
 ```
 
+```{r}
+val_predictions = predict(lr_model_1, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
 
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lr_model_1))
+```
