@@ -27,33 +27,38 @@ library(Metrics)
 
 ```{r, warning=FALSE, message=FALSE}
 data = read_csv('./data/diabetes_binary_health_indicators_BRFSS2015.csv')
-#str(data)
 ```
 
 
-
-
+Checking for NA values
 ```{r}
 sum(is.na(data))
+```
+
+```{r}
 head(data)
 ```
 
-
+Combine Education levels `1` and `2` into one level `12`
 
 ```{r}
 transformed <- data %>%
   mutate (Education = if_else(Education == 1 | Education == 2, 12, Education))
-#transformed$Diabetes_binary = as.factor(transformed$Diabetes_binary)
-str(transformed)
 ```
 
-
+Sub-setting data for the selected education level:
 
 ```{r}
 education_level=12
 
 subset <- transformed %>%
   filter(Education == education_level)
+```
+
+Checking data structure:
+
+```{r}
+str(subset)
 ```
 
 
@@ -85,16 +90,19 @@ Variables in data set:
 
 
 
-## Explanatory Data Analysis
+## Explanatory Data Analysis(EDA)
 
 
 ```{r}
 table(subset$Diabetes_binary)
 ```
 
+
+
 ```{r, message=FALSE}
 ggplot(data = subset, aes(x = Age)) +
-  geom_histogram()
+  geom_histogram(color = "black", fill = 'brown') +
+  labs(title = "Histogram of Age groups distribution", x = "Age group", y = "Frequency")
 ```
 
 ```{r}
@@ -102,17 +110,14 @@ table(subset$Diabetes_binary, subset$Age)
 ```
 
 ```{r}
-table(subset$Diabetes_binary, subset$Sex)
+table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      factor(subset$Sex, labels = c("Female", "Male")))
 ```
 
 
 ```{r}
-#data <- as.matrix(all %>% select(aqius, aqicn, temp_cels, humidity, wind_speed, atm_pressure))
-#cor(as.matrix(subset %>% select(-Education)))
-
 corrplot(cor(as.matrix(subset %>% select(-Education))), 
          type="upper", 
-         #method = "number",
          tl.pos = "lt")
 ```
 
@@ -121,27 +126,24 @@ table(subset$Diabetes_binary, subset$GenHlth)
 ```
 
 ```{r}
-table(subset$Diabetes_binary, subset$HighBP)
+table(subset$Diabetes_binary, factor(subset$HighBP, labels = c("No high BP", "High BP")) )
 ```
 
 ```{r}
-table(subset$Diabetes_binary, subset$HighChol)
+table(subset$Diabetes_binary, factor (subset$HighChol, labels = c("No high chol", "High chol")))
 ```
 
 ```{r}
-#subset$Diabetes_binary = as_factor(subset$Diabetes_binary)
-
-#ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Diabetes_binary))) +
 ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Diabetes_binary))) +
   geom_boxplot() +
-  labs(title = "AQIUS values distribution per country", x = "Country", y = "AQIUS") #+
-  #theme_minimal()
+  labs(title = "BMI distribution for patients with and without diabetes", x = "Diabetes", y = "BMI")
 ```
 
 
 
 ## Modeling
 
+Converting some of the variables to factors.
 
 ```{r}
 names = c('HighBP' ,'HighChol', 
@@ -155,15 +157,9 @@ subset[,names] = lapply(subset[,names] , factor)
 str(subset)
 ```
 
-```{r}
-#data$Diabetes_binary = as_factor(data$Diabetes_binary)
-```
-
 Spiting up data training and validation data sets.
 
 ```{r}
-#subset$Diabetes_binary = as_factor(subset$Diabetes_binary)
-
 set.seed(5)
 trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7, 
                                   list = FALSE, 
@@ -193,37 +189,31 @@ Logistic regression is a statistical and machine learning model used for binary 
 
 
   - Logistic regression is used when the response variable is binary, meaning it has two possible outcomes or classes. 
-  - Logistic regression uses the sigmoid function to model the relationship between the features and the probability of the binary outcome. The logistic function has an S-shaped curve and maps any real-valued number to a value between 0 and 1. $p(x)=\frac{1}{1+e^{-(\beta_0+\beta_1x)}}$. ($p(x)$ is the probability of the dependent variable being 1)
+  - Logistic regression uses the `sigmoid` function to model the relationship between the features and the probability of the binary outcome. The logistic function has an S-shaped curve and maps any real-valued number to a value between 0 and 1. $p(x)=\frac{1}{1+e^{-(\beta_0+\beta_1x)}}$. ($p(x)$ is the probability of the dependent variable being 1)
   - The goal of logistic regression is to find the best-fitting model by estimating the coefficients $\beta_0$, $\beta_1$.
   This is typically done using a process called maximum likelihood estimation. The coefficients are adjusted to maximize the likelihood of the observed data given the model.
   
 
-#### Logistic regression model 1 - HighChol, BMI and GenHlth (no interactions, first order)
+#### Logistic regression model 1
 
 ```{r}
 train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
 val_data$Diabetes_binary_transformed = val_data$Diabetes_binary
 
 levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Diabetes_binary_transformed))
-
 levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
 ```
 
 
-
-
 ```{r}
-train.control <- trainControl(method = "repeatedcv", 
+train.control = trainControl(method = "repeatedcv", 
                               number = 5, 
                               repeats = 10,
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
 
-#train_data$HighChol = as_factor(train_data$HighChol)
-#train_data$GenHlth = as_factor(train_data$GenHlth)
-
 set.seed(83)
-lr_model_1 <- train(Diabetes_binary_transformed ~ 
+lr_model_1 = train(Diabetes_binary_transformed ~ 
                                    HighChol+
                                    BMI + 
                                    GenHlth, 
@@ -237,22 +227,10 @@ summary(lr_model_1)
 ```
 
 
-Calculate log loss for train data. 
-
-```{r}
-
-```
-
-```{r}
-str(train_data)
-```
-
+Create custom fucntion for log loss calculation.
 
 ```{r}
 calculateLogLoss <- function(predicted_probabilities, true_labels) {
-  #log_loss = -mean(true_labels * log(predicted_probabilities) + 
-  #                   (1 - true_labels) * log(1 - predicted_probabilities))
-  #return(log_loss)
   # Avoid log(0) or log(1) which can lead to NaN or Inf values
   predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
                                  1e-15)
@@ -264,8 +242,7 @@ calculateLogLoss <- function(predicted_probabilities, true_labels) {
 ```
 
 
-
-
+Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(lr_model_1, 
@@ -279,6 +256,8 @@ log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_1))
 ```
 
+Calculate log loss for validation data set
+
 ```{r}
 val_predictions = predict(lr_model_1, 
                              newdata = val_data %>% select(-Diabetes_binary), 
@@ -289,4 +268,111 @@ true_labels = as.numeric(val_data$Diabetes_binary)
 
 log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lr_model_1))
+```
+
+
+#### Logistic regression model 2
+
+
+```{r}
+train.control = trainControl(method = "repeatedcv", 
+                              number = 5, 
+                              repeats = 10,
+                              summaryFunction=mnLogLoss,
+                              classProbs = TRUE)
+
+set.seed(8)
+lr_model_2 = train(Diabetes_binary_transformed ~ 
+                                   poly(BMI, 2) + 
+                                   HighChol + HeartDiseaseorAttack+
+                                   HighChol:HeartDiseaseorAttack,
+                                 data = train_data,
+                                 method = "glm", 
+                                 family="binomial",
+                                 metric="logLoss",
+                                 trControl = train.control
+                                )
+summary(lr_model_2)
+```
+
+
+Calculate log loss for train data set
+
+```{r}
+train_predictions = predict(lr_model_2, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_lr_model_2))
+```
+
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(lr_model_2, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lr_model_2))
+```
+
+
+#### Logistic regression model 3
+
+```{r}
+train.control = trainControl(method = "repeatedcv", 
+                              number = 5, 
+                              repeats = 10,
+                              summaryFunction=mnLogLoss,
+                              classProbs = TRUE)
+
+set.seed(10)
+lr_model_3 = train(Diabetes_binary_transformed ~ Income+
+                     Age+GenHlth+
+                     HighBP+
+                     HeartDiseaseorAttack+
+                     poly(BMI, 2),
+                   data = train_data,
+                   method = "glm", 
+                   family="binomial",
+                   metric="logLoss",
+                   trControl = train.control
+                   )
+summary(lr_model_3)
+```
+
+Calculate log loss for train data set
+
+```{r}
+train_predictions = predict(lr_model_3, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_lr_model_3))
+```
+
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(lr_model_3, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lr_model_3))
 ```
