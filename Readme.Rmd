@@ -194,7 +194,7 @@ Logistic regression is a statistical and machine learning model used for binary 
   This is typically done using a process called maximum likelihood estimation. The coefficients are adjusted to maximize the likelihood of the observed data given the model.
   
 
-#### Logistic regression model 1
+#### Fit Logistic regression model 1
 
 ```{r}
 train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
@@ -271,7 +271,7 @@ print(paste("Log Loss:", log_loss_val_lr_model_1))
 ```
 
 
-#### Logistic regression model 2
+#### Fit Logistic regression model 2
 
 
 ```{r}
@@ -325,7 +325,7 @@ print(paste("Log Loss:", log_loss_val_lr_model_2))
 ```
 
 
-#### Logistic regression model 3
+#### Fit Logistic regression model 3
 
 ```{r}
 train.control = trainControl(method = "repeatedcv", 
@@ -376,3 +376,75 @@ true_labels = as.numeric(val_data$Diabetes_binary)
 log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lr_model_3))
 ```
+
+
+### LASSO logistic regression
+
+`LASSO (Least Absolute Shrinkage and Selection Operator) logistic regression` is a statistical method that combines logistic regression with LASSO regularization. It is used for binary classification problems where you want to predict the probability of an event occurring, such as whether a customer will buy a product (yes/no) based on various predictor variables.
+
+How it works:
+
+  -  `LASSO logistic regression` models the probability of an event using the logistic function. It models the log-odds of the event as a linear combination of predictor variables. The logistic function is used to transform the linear combination into probabilities.
+  - `LASSO` adds a regularization term to the logistic regression model. The regularization term is a penalty based on the absolute values of the model coefficients (L1 regularization). This penalty encourages some of the coefficient values to become exactly zero, effectively performing feature selection.
+  - `LASSO` regularization promotes sparsity in the model. It can automatically select a subset of the most relevant predictor variables by setting the coefficients of irrelevant variables to zero. This helps to reduce overfitting and build more interpretable models.
+  - The degree of regularization is controlled by a hyper parameter denoted as $\lambda$.
+
+#### Fit and validate LASSO logistic regression
+
+
+```{r}
+train.control <- trainControl(method = "cv")
+
+set.seed(2)
+lasso_log_reg<-train(Diabetes_binary_transformed ~., 
+                   data = select(train_data, -Diabetes_binary),
+                   method = 'glmnet', 
+                   tuneGrid = expand.grid(alpha = 1, 
+                                          lambda=seq(0, 1, by = 0.1))
+                   ) 
+lasso_log_reg$results
+```
+
+Obtained the best tuning parameter $\lambda$ value is
+
+```{r}
+lasso_log_reg$bestTune$lambda
+```
+
+Plot obtained accuracy for different $\lambda$ values.
+
+```{r}
+plot(lasso_log_reg)
+```
+
+Calculate log loss for train data set
+
+
+```{r}
+train_predictions = predict(lasso_log_reg, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_lasso))
+```
+
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(lasso_log_reg, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lasso))
+```
+
+
+### Classification tree model
