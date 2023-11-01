@@ -1,6 +1,6 @@
 ---
 title: "ST558, Project3"
-author: "Nataliya Peshekhodko"
+author: "Jacob Press, Nataliya Peshekhodko"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -448,3 +448,69 @@ print(paste("Log Loss:", log_loss_val_lasso))
 
 
 ### Classification tree model
+
+### Random forest model
+
+A Random Forest classification model is a supervised machine learning model used for classification tasks. It is an ensemble of multiple decision trees, where each tree predicts the class label of an input based on a set of features. The final prediction in a Random Forest is determined through a combination of predictions from individual decision trees, often using majority voting for classification tasks.
+
+Random Forest might be chosen over a basic Classification Tree for several reasons:
+
+  - **Generalization** - Random Forest typically offers better generalization to new, unseen data. It reduces the risk of overfitting, which is a common issue with basic Classification Trees.
+  - **Higher Accuracy** - Random Forest often provides higher accuracy because it combines multiple decision trees. The majority voting from these trees leads to a more reliable and accurate classification.
+  - **Robustness to Noise** - Basic Classification Trees are sensitive to noise in the data, which can lead to overfitting. Random Forest, through ensemble learning, is more robust to noise and outliers.
+  - **Reduced Variance** - A basic Classification Tree can vary significantly with small changes in the training data. Random Forest reduces this variance because the ensemble of trees accounts for different sources of variance.
+  - **Feature Selection** - Random Forest provides a measure of feature importance. It can help identify which features are most relevant for making predictions. This feature selection is especially valuable when dealing with high-dimensional data.
+  
+  
+```{r}
+train_control <- trainControl(
+  method = "cv",   
+  number = 5,
+)
+
+set.seed(11)
+rf_model = train(
+  Diabetes_binary_transformed ~ ., 
+  data = select(train_data, -Diabetes_binary),
+  method = "rf",
+  tuneGrid = data.frame(mtry = 1:10),
+  trControl = train_control
+)
+
+rf_model$results
+```
+
+```{r}
+plot(rf_model)
+```
+
+
+
+Calculate log loss for train data set
+
+
+```{r}
+train_predictions = predict(rf_model, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_rf))
+```
+
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(rf_model, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_rf))
+```
