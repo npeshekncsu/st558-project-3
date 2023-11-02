@@ -514,3 +514,40 @@ true_labels = as.numeric(val_data$Diabetes_binary)
 log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_rf))
 ```
+
+
+### New model - Support Vector Machine
+
+Support Vector Machine(SVM) is a supervised machine learning algorithm that is used for both classification and regression tasks. It is a powerful and versatile algorithm known for its ability to handle complex decision boundaries and high-dimensional data. SVM works by finding the *optimal hyperplane* that best separates data points into different classes or predicts a continuous target variable.
+
+Main components of SVM:
+
+  - **Hyperplane** - SVM's core concept is to find the optimal hyperplane that maximizes the margin between two classes in a dataset. The hyperplane is the decision boundary that separates data points into different classes. In two dimensions, it's a line; in higher dimensions, it's a hyperplane.
+  - **Support Vectors** - Support Vectors are the data points that are closest to the decision boundary, or hyperplane. These support vectors play a crucial role in determining the position and orientation of the hyperplane.
+  - **Margin** - The margin is the distance between the decision boundary (hyperplane) and the closest support vectors. SVM aims to maximize this margin, as it represents the separation between classes. The larger the margin, the better the model's generalization.
+  - **Kernel Trick** - SVM can handle both linearly separable and non-linearly separable data. The kernel trick allows SVM to transform data into higher-dimensional space, making it possible to find linear separation in this transformed space. Common kernel functions include linear, polynomial, radial basis function (RBF), and sigmoid.
+  - **C Parameter** - SVM has a hyperparameter called C, which controls the trade-off between maximizing the margin and minimizing the classification error. Smaller C values lead to a larger margin but may allow some misclassification, while larger C values lead to a smaller margin with fewer misclassifications.
+  
+  
+```{r, warning=FALSE}
+train_control = trainControl(
+  method = "cv",
+  number = 5
+)
+
+svm_grid = expand.grid(
+  .sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
+  .C = c(0.1, 1, 10)          # Range of C values for regularization
+)
+
+svm_model = train(
+  Diabetes_binary_transformed ~ ., 
+  data = select(train_data, -Diabetes_binary),
+  method = "svmRadial", 
+  trControl = train_control,
+  tuneGrid = svm_grid
+)
+
+summary(svm_model)
+```
+
