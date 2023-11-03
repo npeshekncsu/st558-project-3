@@ -75,7 +75,7 @@ Variables in data set:
   - **HighChol** - 0 = no high cholesterol, 1 = high cholesterol
   - **CholCheck** - 0 = no cholesterol check in 5 years,  1 = yes cholesterol check in 5 years
   - **BMI** - Body Mass Index
-  - **Smoker** - Have you smoked at least 100 cigarettes in your entire life? [Note: 5 packs = 100 cigarettes] 0 = no, 1 = yes
+  - **Smoker** - Have you smoked at least 100 cigarettes in your entire life? 0 = no, 1 = yes
   - **Stroke** - (Ever told) you had a stroke. 0 = no,  1 = yes
   - **HeartDiseaseorAttack** - Coronary heart disease (CHD) or myocardial infarction (MI), 0 = no, 1 = yes
   - **PhysActivity** - Physical activity in past 30 days - not including job,  0 = no, 1 = yes
@@ -186,6 +186,8 @@ Mathematical interpretation: Log Loss is the negative average of the log of corr
 $$log \ loss = -\frac{1}{N} \sum_{i=1}^N y_i log(p(y_i)) + (1-y_i)log(1-p(y_i))$$
 
 $p(y_i)$ is the probability of $1$.
+
+  
 $1-p(y_i)$ is the probability of 0.
 
 
@@ -210,11 +212,20 @@ levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Di
 levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
 ```
 
+```{r}
+train_data$Diabetes_binary
+```
+
 
 ```{r}
-train.control = trainControl(method = "repeatedcv", 
+#train.control = trainControl(method = "repeatedcv", 
+#                              number = 5, 
+#                              repeats = 10,
+#                              summaryFunction=mnLogLoss,
+#                              classProbs = TRUE)
+
+train.control = trainControl(method = "cv", 
                               number = 5, 
-                              repeats = 10,
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
 
@@ -233,7 +244,7 @@ summary(lr_model_1)
 ```
 
 
-Create custom fucntion for log loss calculation.
+Create custom function for log loss calculation.
 
 ```{r}
 calculateLogLoss <- function(predicted_probabilities, true_labels) {
@@ -248,7 +259,7 @@ calculateLogLoss <- function(predicted_probabilities, true_labels) {
 ```
 
 
-Calculate log loss for train data set
+Calculate log loss for train data set for logistic regression model #1.
 
 ```{r}
 train_predictions = predict(lr_model_1, 
@@ -256,11 +267,14 @@ train_predictions = predict(lr_model_1,
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.numeric(train_data$Diabetes_binary)
+#true_labels = as.numeric(train_data$Diabetes_binary)
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_1))
 ```
+
+
 
 Calculate log loss for validation data set
 
@@ -270,7 +284,8 @@ val_predictions = predict(lr_model_1,
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.numeric(val_data$Diabetes_binary)
+#true_labels = as.numeric(val_data$Diabetes_binary)
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lr_model_1))
@@ -281,9 +296,13 @@ print(paste("Log Loss:", log_loss_val_lr_model_1))
 
 
 ```{r}
-train.control = trainControl(method = "repeatedcv", 
+#train.control = trainControl(method = "repeatedcv", 
+#                              number = 5, 
+#                              repeats = 10,
+#                              summaryFunction=mnLogLoss,
+#                              classProbs = TRUE)
+train.control = trainControl(method = "cv", 
                               number = 5, 
-                              repeats = 10,
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
 
@@ -310,7 +329,8 @@ train_predictions = predict(lr_model_2,
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.numeric(train_data$Diabetes_binary)
+#true_labels = as.numeric(train_data$Diabetes_binary)
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_2))
@@ -324,7 +344,8 @@ val_predictions = predict(lr_model_2,
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.numeric(val_data$Diabetes_binary)
+#true_labels = as.numeric(val_data$Diabetes_binary)
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lr_model_2))
@@ -334,9 +355,15 @@ print(paste("Log Loss:", log_loss_val_lr_model_2))
 ### Fit Logistic regression model 3
 
 ```{r}
-train.control = trainControl(method = "repeatedcv", 
+#train.control = trainControl(method = "repeatedcv", 
+#                              number = 5, 
+#                              repeats = 10,
+#                              summaryFunction=mnLogLoss,
+#                              classProbs = TRUE)
+
+
+train.control = trainControl(method = "cv", 
                               number = 5, 
-                              repeats = 10,
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
 
@@ -363,7 +390,8 @@ train_predictions = predict(lr_model_3,
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.numeric(train_data$Diabetes_binary)
+#true_labels = as.numeric(train_data$Diabetes_binary)
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_3))
@@ -377,11 +405,13 @@ val_predictions = predict(lr_model_3,
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.numeric(val_data$Diabetes_binary)
+#true_labels = as.numeric(val_data$Diabetes_binary)
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lr_model_3))
 ```
+
 
 
 ## LASSO logistic regression
@@ -399,12 +429,16 @@ How it works:
 
 
 ```{r}
-train.control <- trainControl(method = "cv")
+train.control <- trainControl(method = "cv",
+                              number = 5, 
+                              summaryFunction=mnLogLoss,
+                              classProbs = TRUE)
 
 set.seed(2)
 lasso_log_reg<-train(Diabetes_binary_transformed ~., 
                    data = select(train_data, -Diabetes_binary),
-                   method = 'glmnet', 
+                   method = 'glmnet',
+                   #metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
                                           lambda=seq(0, 1, by = 0.1))
                    ) 
@@ -432,7 +466,8 @@ train_predictions = predict(lasso_log_reg,
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.numeric(train_data$Diabetes_binary)
+#true_labels = as.numeric(train_data$Diabetes_binary)
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lasso))
@@ -446,7 +481,8 @@ val_predictions = predict(lasso_log_reg,
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.numeric(val_data$Diabetes_binary)
+#true_labels = as.numeric(val_data$Diabetes_binary)
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_lasso))
@@ -501,7 +537,8 @@ train_predictions = predict(rf_model,
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.numeric(train_data$Diabetes_binary)
+#true_labels = as.numeric(train_data$Diabetes_binary)
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_rf))
@@ -515,7 +552,8 @@ val_predictions = predict(rf_model,
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.numeric(val_data$Diabetes_binary)
+#true_labels = as.numeric(val_data$Diabetes_binary)
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_rf))
