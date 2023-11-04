@@ -579,23 +579,46 @@ train_control = trainControl(
   number = 5
 )
 
-svm_grid = expand.grid(
-  .sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
-  .C = c(0.1, 1, 10)          # Range of C values for regularization
-)
+#svm_grid = expand.grid(
+#  sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
+#  C = c(0.1, 1, 10)          # Range of C values for regularization
+#)
+
+#svm_grid = expand.grid(C = c(0.1, 1, 10), degree = 2)
+
+
 
 svm_model = train(
   Diabetes_binary_transformed ~ ., 
   data = select(train_data, -Diabetes_binary),
-  method = "svmRadial", 
+  #method = "svmRadial",
+  method = "svmPoly",
   trControl = train_control,
-  tuneGrid = svm_grid
+  tuneGrid = expand.grid(degree = c(2, 3, 4)) 
 )
-
 svm_model
 ```
 
 
 ```{r}
 plot(svm_model)
+
+svm_model$bestTune
 ```
+
+Calculate log loss for train data set
+
+
+```{r}
+train_predictions = predict(svm_model, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+train_predictions
+
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
+
+#log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_rf))
+```
+
