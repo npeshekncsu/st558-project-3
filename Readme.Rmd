@@ -491,6 +491,8 @@ print(paste("Log Loss:", log_loss_val_lasso))
 
 ## Classification tree model
 
+A Classification tree model is a supervised machine learning model used to predict group membership.
+
 ## Random forest model
 
 A Random Forest classification model is a supervised machine learning model used for classification tasks. It is an ensemble of multiple decision trees, where each tree predicts the class label of an input based on a set of features. The final prediction in a Random Forest is determined through a combination of predictions from individual decision trees, often using majority voting for classification tasks.
