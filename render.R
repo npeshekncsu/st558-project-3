@@ -6,7 +6,6 @@ params_list = list("12", "3")
 for (education_level in params_list) {
 
   param = list(education_level = education_level)
-  print(education_level)
   
   render(
     input = "Readme.Rmd",

@@ -12,7 +12,7 @@ date: "`r Sys.Date()`"
 
 # Introduction
 
-
+This report build for education level `r params$education_level`.
 
 # Packages
 
@@ -28,6 +28,8 @@ library(Metrics)
 
 # Data
 
+Reading data from `csv` file.
+
 ```{r, warning=FALSE, message=FALSE}
 data = read_csv('./data/diabetes_binary_health_indicators_BRFSS2015.csv')
 ```
@@ -38,6 +40,9 @@ Checking for NA values
 sum(is.na(data))
 ```
 
+There are no missing values in the data set.
+
+Let's look at the head of data.
 ```{r}
 head(data)
 ```
@@ -50,10 +55,6 @@ transformed <- data %>%
 ```
 
 Sub-setting data for the selected education level:
-
-```{r}
-print(params$education_level)
-```
 
 ```{r}
 education_level = params$education_level
@@ -95,32 +96,38 @@ Variables in data set:
   - **Income** - Income scale scale 1-8,  1 = less than 10,000 dol,  5 = less than 35,000 dol,  8 = 75,000 dol or more
   
 
-
-
 # Explanatory Data Analysis(EDA)
 
+First, let's look at number of thr records with Diabetes and without Diabetes for the selected education level:
 
 ```{r}
-table(subset$Diabetes_binary)
+table (factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")) )
 ```
 
-
+Let's look at `Age` distribution for the selected education level:
 
 ```{r, message=FALSE}
 ggplot(data = subset, aes(x = Age)) +
   geom_histogram(color = "black", fill = 'brown') +
-  labs(title = "Histogram of Age groups distribution", x = "Age group", y = "Frequency")
+  labs(title = "Histogram of Age groups distribution", 
+       x = "Age group", 
+       y = "Frequency")
 ```
 
+Let's look at number of cases with Diabetes and without Diabetes for each age group for the selected education level
+
 ```{r}
-table(subset$Diabetes_binary, subset$Age)
+# TODO: update levels for ages
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), subset$Age)
 ```
+Number of cases with Diabetes and without Diabetes for males and females.
 
 ```{r}
 table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
       factor(subset$Sex, labels = c("Female", "Male")))
 ```
 
+Linear correlation between numeric variables.
 
 ```{r}
 corrplot(cor(as.matrix(subset %>% select(-Education))), 
@@ -128,17 +135,28 @@ corrplot(cor(as.matrix(subset %>% select(-Education))),
          tl.pos = "lt")
 ```
 
-```{r}
-table(subset$Diabetes_binary, subset$GenHlth)
-```
+Number of cases with Diabetes and without Diabetes for each general health level.
 
 ```{r}
-table(subset$Diabetes_binary, factor(subset$HighBP, labels = c("No high BP", "High BP")) )
+#TODO: update levels
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      subset$GenHlth)
 ```
+Number of cases with Diabetes and without Diabetes for high blood pressure and normal blood pressure patients.
 
 ```{r}
-table(subset$Diabetes_binary, factor (subset$HighChol, labels = c("No high chol", "High chol")))
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      factor(subset$HighBP, labels = c("No high BP", "High BP")) )
 ```
+
+Number of cases with Diabetes and without Diabetes for high cholesterol and normal cholesterol patients.
+
+```{r}
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      factor (subset$HighChol, labels = c("No high chol", "High chol")))
+```
+
+BMI distribution for patients with Diabetes and without Diabetes for the selected education level.
 
 ```{r}
 ggplot(subset, aes(x = as_factor(Diabetes_binary), 
@@ -163,7 +181,9 @@ names = c('HighBP' ,'HighChol',
           'HeartDiseaseorAttack', 'PhysActivity',
           'Fruits', 'Veggies', 
           'HvyAlcoholConsump', 'Sex',
-          'Age','Income')
+          'Age','Income', 'GenHlth', 
+          'MentHlth', 'PhysHlth', 'DiffWalk',
+          'AnyHealthcare', 'NoDocbcCost')
 subset[,names] = lapply(subset[,names] , factor)
 str(subset)
 ```
@@ -209,7 +229,7 @@ Logistic regression is a statistical and machine learning model used for binary 
   This is typically done using a process called maximum likelihood estimation. The coefficients are adjusted to maximize the likelihood of the observed data given the model.
   
   
-Creating lists to store model perfromance on train and validations data sets.
+Creating lists to store model performance on train and validations data sets.
 
 ```{r}
 models_performace_train = list()
@@ -227,7 +247,7 @@ levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabet
 ```
 
 ```{r}
-train_data
+str(train_data)
 ```
 
 
@@ -256,7 +276,6 @@ Create custom function for log loss calculation.
 
 ```{r}
 calculateLogLoss <- function(predicted_probabilities, true_labels) {
-  # Avoid log(0) or log(1) which can lead to NaN or Inf values
   predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
                                  1e-15)
 
@@ -273,8 +292,6 @@ Calculate log loss for train data set for logistic regression model #1.
 train_predictions = predict(lr_model_1, 
                              newdata = train_data %>% select(-Diabetes_binary), 
                              type = "prob")
-
-train_predictions
 
 predicted_prob_class1 = train_predictions[, 1]
 true_labels = as.integer(as.character(train_data$Diabetes_binary))
@@ -293,7 +310,6 @@ Calculate log loss for validation data set
 val_predictions = predict(lr_model_1, 
                              newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
-val_predictions
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
@@ -336,7 +352,6 @@ Calculate log loss for train data set
 train_predictions = predict(lr_model_2, 
                              newdata = train_data %>% select(-Diabetes_binary), 
                              type = "prob")
-train_predictions
 
 predicted_prob_class1 = train_predictions[, 1]
 true_labels = as.integer(as.character(train_data$Diabetes_binary))
@@ -353,7 +368,6 @@ Calculate log loss for validation data set
 val_predictions = predict(lr_model_2, 
                              newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
-val_predictions
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
@@ -472,7 +486,6 @@ Calculate log loss for train data set
 train_predictions = predict(lasso_log_reg, 
                              newdata = train_data %>% select(-Diabetes_binary), 
                              type = "prob")
-train_predictions
 
 predicted_prob_class1 = train_predictions[, 1]
 true_labels = as.integer(as.character(train_data$Diabetes_binary))
