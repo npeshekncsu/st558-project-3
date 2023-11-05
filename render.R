@@ -1,23 +1,7 @@
-#library(rmarkdown)
-
-#params_list = list(education_level = "12", "3")
-
-#render(input="Readme.Rmd", 
-#       output_file = "README.md",
-#       runtime = "static",
-#       params = params_list,
-#       output_format = "github_document",
-#       output_options = list(
-#         toc = TRUE, 
-#         toc_depth = 4,
-#         number_sections = TRUE))
-
-
-
-
 library(rmarkdown)
 
-params_list = list("12", "3")
+#params_list = list("12", "3", "4", "5", "6")
+params_list = list("12")
 
 for (education_level in params_list) {
 
@@ -26,7 +10,7 @@ for (education_level in params_list) {
   
   render(
     input = "Readme.Rmd",
-    output_file = paste0("README_", education_level, ".md"),
+    output_file = paste0("Education_level_", education_level, "_report.md"),
     runtime = "static",
     params = param, 
     output_format = "github_document",

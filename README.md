@@ -1,22 +1,47 @@
 ST558, Project3
 ================
-Nataliya Peshekhodko
-2023-10-29
+Jacob Press, Nataliya Peshekhodko
+2023-11-02
 
-- <a href="#01-introduction" id="toc-01-introduction">0.1 Introduction</a>
-- <a href="#02-packages" id="toc-02-packages">0.2 Packages</a>
-- <a href="#03-data" id="toc-03-data">0.3 Data</a>
-- <a href="#04-explanatory-data-analysiseda"
-  id="toc-04-explanatory-data-analysiseda">0.4 Explanatory Data
+- <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
+- <a href="#2-packages" id="toc-2-packages">2 Packages</a>
+- <a href="#3-data" id="toc-3-data">3 Data</a>
+- <a href="#4-explanatory-data-analysiseda"
+  id="toc-4-explanatory-data-analysiseda">4 Explanatory Data
   Analysis(EDA)</a>
-- <a href="#05-modeling" id="toc-05-modeling">0.5 Modeling</a>
-  - <a href="#051-log-loss" id="toc-051-log-loss">0.5.1 Log loss</a>
-  - <a href="#052-logistic-regression"
-    id="toc-052-logistic-regression">0.5.2 Logistic regression</a>
+- <a href="#5-modeling" id="toc-5-modeling">5 Modeling</a>
+  - <a href="#51-log-loss" id="toc-51-log-loss">5.1 Log loss</a>
+  - <a href="#52-logistic-regression" id="toc-52-logistic-regression">5.2
+    Logistic regression</a>
+    - <a href="#521-fit-logistic-regression-model-1"
+      id="toc-521-fit-logistic-regression-model-1">5.2.1 Fit Logistic
+      regression model 1</a>
+    - <a href="#522-fit-logistic-regression-model-2"
+      id="toc-522-fit-logistic-regression-model-2">5.2.2 Fit Logistic
+      regression model 2</a>
+    - <a href="#523-fit-logistic-regression-model-3"
+      id="toc-523-fit-logistic-regression-model-3">5.2.3 Fit Logistic
+      regression model 3</a>
+  - <a href="#53-lasso-logistic-regression"
+    id="toc-53-lasso-logistic-regression">5.3 LASSO logistic regression</a>
+    - <a href="#531-fit-and-validate-lasso-logistic-regression"
+      id="toc-531-fit-and-validate-lasso-logistic-regression">5.3.1 Fit and
+      validate LASSO logistic regression</a>
+  - <a href="#54-classification-tree-model"
+    id="toc-54-classification-tree-model">5.4 Classification tree model</a>
+  - <a href="#55-random-forest-model" id="toc-55-random-forest-model">5.5
+    Random forest model</a>
+  - <a href="#56-new-model---support-vector-machine"
+    id="toc-56-new-model---support-vector-machine">5.6 New model - Support
+    Vector Machine</a>
 
-## 0.1 Introduction
+``` r
+#source("render.R")
+```
 
-## 0.2 Packages
+# 1 Introduction
+
+# 2 Packages
 
 ``` r
 library(tidyverse)
@@ -27,7 +52,7 @@ library(caret)
 library(Metrics)
 ```
 
-## 0.3 Data
+# 3 Data
 
 ``` r
 data = read_csv('./data/diabetes_binary_health_indicators_BRFSS2015.csv')
@@ -67,7 +92,16 @@ transformed <- data %>%
 Sub-setting data for the selected education level:
 
 ``` r
-education_level=12
+print(params$education_level)
+```
+
+    ## [1] "12"
+
+``` r
+#education_level=12
+#education_level = get(params$education_level)
+education_level = params$education_level
+
 
 subset <- transformed %>%
   filter(Education == education_level)
@@ -144,7 +178,7 @@ Variables in data set:
 - **Income** - Income scale scale 1-8, 1 = less than 10,000 dol, 5 =
   less than 35,000 dol, 8 = 75,000 dol or more
 
-## 0.4 Explanatory Data Analysis(EDA)
+# 4 Explanatory Data Analysis(EDA)
 
 ``` r
 table(subset$Diabetes_binary)
@@ -160,7 +194,7 @@ ggplot(data = subset, aes(x = Age)) +
   labs(title = "Histogram of Age groups distribution", x = "Age group", y = "Frequency")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-183-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 table(subset$Diabetes_binary, subset$Age)
@@ -187,7 +221,7 @@ corrplot(cor(as.matrix(subset %>% select(-Education))),
          tl.pos = "lt")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-186-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 table(subset$Diabetes_binary, subset$GenHlth)
@@ -222,9 +256,9 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary), y = BMI, fill = as_factor(Dia
   labs(title = "BMI distribution for patients with and without diabetes", x = "Diabetes", y = "BMI")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-190-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-## 0.5 Modeling
+# 5 Modeling
 
 Converting some of the variables to factors.
 
@@ -275,7 +309,7 @@ train_data = subset[trainIndex, ]
 val_data = subset[-trainIndex, ]
 ```
 
-### 0.5.1 Log loss
+## 5.1 Log loss
 
 **Log loss**, also known as **logarithmic loss** or **cross-entropy
 loss**, is a common evaluation metric for binary classification models.
@@ -292,7 +326,7 @@ $$log \ loss = -\frac{1}{N} \sum_{i=1}^N y_i log(p(y_i)) + (1-y_i)log(1-p(y_i))$
 
 $p(y_i)$ is the probability of $1$. $1-p(y_i)$ is the probability of 0.
 
-### 0.5.2 Logistic regression
+## 5.2 Logistic regression
 
 Logistic regression is a statistical and machine learning model used for
 binary classification tasks. It’s a type of regression analysis that’s
@@ -313,7 +347,7 @@ to one of two classes or categories.
   coefficients are adjusted to maximize the likelihood of the observed
   data given the model.
 
-#### 0.5.2.1 Logistic regression model 1
+### 5.2.1 Fit Logistic regression model 1
 
 ``` r
 train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
@@ -411,7 +445,7 @@ print(paste("Log Loss:", log_loss_val_lr_model_1))
 
     ## [1] "Log Loss: 0.164892302343813"
 
-#### 0.5.2.2 Logistic regression model 2
+### 5.2.2 Fit Logistic regression model 2
 
 ``` r
 train.control = trainControl(method = "repeatedcv", 
@@ -489,7 +523,7 @@ print(paste("Log Loss:", log_loss_val_lr_model_2))
 
     ## [1] "Log Loss: 0.182165322539743"
 
-#### 0.5.2.3 Logistic regression model 3
+### 5.2.3 Fit Logistic regression model 3
 
 ``` r
 train.control = trainControl(method = "repeatedcv", 
@@ -586,3 +620,294 @@ print(paste("Log Loss:", log_loss_val_lr_model_3))
 ```
 
     ## [1] "Log Loss: 0.246097189832437"
+
+## 5.3 LASSO logistic regression
+
+`LASSO (Least Absolute Shrinkage and Selection Operator) logistic regression`
+is a statistical method that combines logistic regression with LASSO
+regularization. It is used for binary classification problems where you
+want to predict the probability of an event occurring, such as whether a
+customer will buy a product (yes/no) based on various predictor
+variables.
+
+How it works:
+
+- `LASSO logistic regression` models the probability of an event using
+  the logistic function. It models the log-odds of the event as a linear
+  combination of predictor variables. The logistic function is used to
+  transform the linear combination into probabilities.
+- `LASSO` adds a regularization term to the logistic regression model.
+  The regularization term is a penalty based on the absolute values of
+  the model coefficients (L1 regularization). This penalty encourages
+  some of the coefficient values to become exactly zero, effectively
+  performing feature selection.
+- `LASSO` regularization promotes sparsity in the model. It can
+  automatically select a subset of the most relevant predictor variables
+  by setting the coefficients of irrelevant variables to zero. This
+  helps to reduce overfitting and build more interpretable models.
+- The degree of regularization is controlled by a hyper parameter
+  denoted as $\lambda$.
+
+### 5.3.1 Fit and validate LASSO logistic regression
+
+``` r
+train.control <- trainControl(method = "cv")
+
+set.seed(2)
+lasso_log_reg<-train(Diabetes_binary_transformed ~., 
+                   data = select(train_data, -Diabetes_binary),
+                   method = 'glmnet', 
+                   tuneGrid = expand.grid(alpha = 1, 
+                                          lambda=seq(0, 1, by = 0.1))
+                   ) 
+lasso_log_reg$results
+```
+
+    ##    alpha lambda  Accuracy     Kappa  AccuracySD    KappaSD
+    ## 1      1    0.0 0.7306249 0.2604256 0.011703434 0.02470501
+    ## 2      1    0.1 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 3      1    0.2 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 4      1    0.3 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 5      1    0.4 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 6      1    0.5 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 7      1    0.6 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 8      1    0.7 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 9      1    0.8 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 10     1    0.9 0.7048343 0.0000000 0.008601157 0.00000000
+    ## 11     1    1.0 0.7048343 0.0000000 0.008601157 0.00000000
+
+Obtained the best tuning parameter $\lambda$ value is
+
+``` r
+lasso_log_reg$bestTune$lambda
+```
+
+    ## [1] 0
+
+Plot obtained accuracy for different $\lambda$ values.
+
+``` r
+plot(lasso_log_reg)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+Calculate log loss for train data set
+
+``` r
+train_predictions = predict(lasso_log_reg, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_lasso))
+```
+
+    ## [1] "Log Loss: 0.282522897215822"
+
+Calculate log loss for validation data set
+
+``` r
+val_predictions = predict(lasso_log_reg, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lasso))
+```
+
+    ## [1] "Log Loss: 0.237151866125609"
+
+## 5.4 Classification tree model
+
+## 5.5 Random forest model
+
+A Random Forest classification model is a supervised machine learning
+model used for classification tasks. It is an ensemble of multiple
+decision trees, where each tree predicts the class label of an input
+based on a set of features. The final prediction in a Random Forest is
+determined through a combination of predictions from individual decision
+trees, often using majority voting for classification tasks.
+
+Random Forest might be chosen over a basic Classification Tree for
+several reasons:
+
+- **Generalization** - Random Forest typically offers better
+  generalization to new, unseen data. It reduces the risk of
+  overfitting, which is a common issue with basic Classification Trees.
+- **Higher Accuracy** - Random Forest often provides higher accuracy
+  because it combines multiple decision trees. The majority voting from
+  these trees leads to a more reliable and accurate classification.
+- **Robustness to Noise** - Basic Classification Trees are sensitive to
+  noise in the data, which can lead to overfitting. Random Forest,
+  through ensemble learning, is more robust to noise and outliers.
+- **Reduced Variance** - A basic Classification Tree can vary
+  significantly with small changes in the training data. Random Forest
+  reduces this variance because the ensemble of trees accounts for
+  different sources of variance.
+- **Feature Selection** - Random Forest provides a measure of feature
+  importance. It can help identify which features are most relevant for
+  making predictions. This feature selection is especially valuable when
+  dealing with high-dimensional data.
+
+``` r
+train_control <- trainControl(
+  method = "cv",   
+  number = 5,
+)
+
+set.seed(11)
+rf_model = train(
+  Diabetes_binary_transformed ~ ., 
+  data = select(train_data, -Diabetes_binary),
+  method = "rf",
+  tuneGrid = data.frame(mtry = 1:10),
+  trControl = train_control
+)
+
+rf_model$results
+```
+
+    ##    mtry  Accuracy      Kappa   AccuracySD    KappaSD
+    ## 1     1 0.7083335 0.00000000 0.0006286554 0.00000000
+    ## 2     2 0.7144317 0.05159205 0.0038136538 0.02965216
+    ## 3     3 0.7273096 0.16375845 0.0128490356 0.03714296
+    ## 4     4 0.7266317 0.20370420 0.0127813130 0.02806713
+    ## 5     5 0.7256147 0.21813647 0.0093223791 0.02687606
+    ## 6     6 0.7269707 0.22855808 0.0104728102 0.01944828
+    ## 7     7 0.7229063 0.22426681 0.0103960606 0.02414927
+    ## 8     8 0.7218894 0.22983847 0.0097616511 0.01274698
+    ## 9     9 0.7259554 0.23800661 0.0128991336 0.02675085
+    ## 10   10 0.7266317 0.24703278 0.0110952593 0.02333700
+
+``` r
+plot(rf_model)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+
+Calculate log loss for train data set
+
+``` r
+train_predictions = predict(rf_model, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.numeric(train_data$Diabetes_binary)
+
+log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_rf))
+```
+
+    ## [1] "Log Loss: 0.399241572604979"
+
+Calculate log loss for validation data set
+
+``` r
+val_predictions = predict(rf_model, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.numeric(val_data$Diabetes_binary)
+
+log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_rf))
+```
+
+    ## [1] "Log Loss: 0.0798138930109476"
+
+## 5.6 New model - Support Vector Machine
+
+Support Vector Machine(SVM) is a supervised machine learning algorithm
+that is used for both classification and regression tasks. It is a
+powerful and versatile algorithm known for its ability to handle complex
+decision boundaries and high-dimensional data. SVM works by finding the
+*optimal hyperplane* that best separates data points into different
+classes or predicts a continuous target variable.
+
+Main components of SVM:
+
+- **Hyperplane** - SVM’s core concept is to find the optimal hyperplane
+  that maximizes the margin between two classes in a dataset. The
+  hyperplane is the decision boundary that separates data points into
+  different classes. In two dimensions, it’s a line; in higher
+  dimensions, it’s a hyperplane.
+- **Support Vectors** - Support Vectors are the data points that are
+  closest to the decision boundary, or hyperplane. These support vectors
+  play a crucial role in determining the position and orientation of the
+  hyperplane.
+- **Margin** - The margin is the distance between the decision boundary
+  (hyperplane) and the closest support vectors. SVM aims to maximize
+  this margin, as it represents the separation between classes. The
+  larger the margin, the better the model’s generalization.
+- **Kernel Trick** - SVM can handle both linearly separable and
+  non-linearly separable data. The kernel trick allows SVM to transform
+  data into higher-dimensional space, making it possible to find linear
+  separation in this transformed space. Common kernel functions include
+  linear, polynomial, radial basis function (RBF), and sigmoid.
+- **C Parameter** - SVM has a hyperparameter called C, which controls
+  the trade-off between maximizing the margin and minimizing the
+  classification error. Smaller C values lead to a larger margin but may
+  allow some misclassification, while larger C values lead to a smaller
+  margin with fewer misclassifications.
+
+``` r
+train_control = trainControl(
+  method = "cv",
+  number = 5
+)
+
+svm_grid = expand.grid(
+  .sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
+  .C = c(0.1, 1, 10)          # Range of C values for regularization
+)
+
+svm_model = train(
+  Diabetes_binary_transformed ~ ., 
+  data = select(train_data, -Diabetes_binary),
+  method = "svmRadial", 
+  trControl = train_control,
+  tuneGrid = svm_grid
+)
+
+svm_model
+```
+
+    ## Support Vector Machines with Radial Basis Function Kernel 
+    ## 
+    ## 2952 samples
+    ##   21 predictor
+    ##    2 classes: 'X0', 'X1' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 2362, 2362, 2361, 2361, 2362 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   sigma  C     Accuracy   Kappa      
+    ##   0.01    0.1  0.7120594  0.031878687
+    ##   0.01    1.0  0.7225547  0.130432132
+    ##   0.01   10.0  0.7127345  0.173670400
+    ##   0.10    0.1  0.7083335  0.000000000
+    ##   0.10    1.0  0.7286530  0.164179350
+    ##   0.10   10.0  0.6937687  0.198959506
+    ##   1.00    0.1  0.7083335  0.000000000
+    ##   1.00    1.0  0.7083335  0.000000000
+    ##   1.00   10.0  0.7079956  0.003194205
+    ## 
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final values used for the model were sigma = 0.1 and C = 1.
+
+``` r
+plot(svm_model)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
