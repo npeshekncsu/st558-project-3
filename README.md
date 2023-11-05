@@ -15,3 +15,8 @@ Packages used:
   - `caret`
   - `Metrics`
 
+
+Links to reports for specified education levels:
+
+  - Never attended school or only kindergarten or Grades 1 - 8 (Elementary) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_12_report.md)
+  - Grades 9 - 11 (Some high school) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_3_report.md)
