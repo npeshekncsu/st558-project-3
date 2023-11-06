@@ -37,12 +37,14 @@ Checking for NA values
 sum(is.na(data))
 ```
 
+
 There are no missing values in the data set.
 
 Let's look at the head of data.
 ```{r}
 head(data)
 ```
+
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -54,7 +56,9 @@ transformed <- data %>%
 Sub-setting data for the selected education level:
 
 ```{r}
-education_level = params$education_level
+#education_level = params$education_level
+#TODO: remove hard coded value
+education_level = 6
 
 subset <- transformed %>%
   filter(Education == education_level)
@@ -187,6 +191,7 @@ subset[,names] = lapply(subset[,names] , factor)
 str(subset)
 ```
 
+
 Spiting up data training and validation data sets.
 
 ```{r}
@@ -243,10 +248,6 @@ val_data$Diabetes_binary_transformed = val_data$Diabetes_binary
 
 levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Diabetes_binary_transformed))
 levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
-```
-
-```{r}
-str(train_data)
 ```
 
 
@@ -459,11 +460,12 @@ set.seed(2)
 lasso_log_reg<-train(Diabetes_binary ~., 
                    data = dplyr::select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
-                   #metric="logLoss",
+                   metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
                                           lambda=seq(0, 1, by = 0.1))
 )
 lasso_log_reg$results
+
 ```
 
 Obtained the best tuning parameter $\lambda$ value is
@@ -524,13 +526,16 @@ Here is a break down of the tree structure:
   - **Leaf Nodes** - The terminal node displaying the classification.
 
 ```{r}
-train_control <- trainControl(method = "cv", 
-                        number = 5)
+train_control <- trainControl(method = "cv",
+                              summaryFunction=mnLogLoss,
+                              classProbs = TRUE,
+                              number = 5)
 set.seed(1122)
-tree_model <- train(Diabetes_binary ~ ., 
-                data = dplyr::select(train_data, -Diabetes_binary_transformed), 
+tree_model <- train(Diabetes_binary_transformed ~ ., 
+                data = dplyr::select(train_data, -Diabetes_binary), 
                 method = "rpart",
                 trControl = train_control,
+                metric="logLoss",
                 tuneGrid = data.frame(cp=seq(0,.022, by = .001))
                 )
 
@@ -588,14 +593,23 @@ Random Forest might be chosen over a basic Classification Tree for several reaso
 train_control <- trainControl(
   method = "cv",   
   number = 5,
+  summaryFunction=mnLogLoss,
+  classProbs = TRUE
 )
 
+# limiting number of the features due 
+# to performance issues with random forest algorithm
 set.seed(11)
 rf_model = train(
-  Diabetes_binary ~ ., 
-  data = dplyr::select(train_data, -Diabetes_binary_transformed),
+  #Diabetes_binary_transformed ~ ., 
+  Diabetes_binary_transformed ~ HighChol+
+                                BMI + 
+                                GenHlth+
+                                HeartDiseaseorAttack,
+  data = dplyr::select(train_data, -Diabetes_binary),
   method = "rf",
-  tuneGrid = data.frame(mtry = 1:10),
+  metric="logLoss",
+  tuneGrid = data.frame(mtry = c(1:3)), 
   trControl = train_control
 )
 
@@ -659,7 +673,8 @@ Main components of SVM:
 train_control = trainControl(
   method = "cv",
   number = 5,
-  classProbs =  TRUE
+  classProbs =  TRUE,
+  summaryFunction=mnLogLoss
 )
 
 svm_grid = expand.grid(
@@ -667,11 +682,17 @@ svm_grid = expand.grid(
   C = c(0.1, 1, 10)          # Range of C values for regularization
 )
 
+# limiting number of features due to performance 
+# issues of the algorithm 
 svm_model = train(
-  Diabetes_binary_transformed ~ ., 
+  #Diabetes_binary_transformed ~ ., 
+  Diabetes_binary_transformed ~ HighChol+
+                                BMI + 
+                                GenHlth,
   data = dplyr::select(train_data, -Diabetes_binary),
   method = "svmRadial",
   trControl = train_control,
+  metric="logLoss",
   tuneGrid = svm_grid
 )
 svm_model
@@ -680,7 +701,10 @@ svm_model
 
 ```{r}
 plot(svm_model)
+```
 
+
+```{r}
 svm_model$bestTune
 ```
 
@@ -724,6 +748,8 @@ models_performace_val[["svm"]] = log_loss_val_svm
 train_control = trainControl(
   method = "cv",
   number = 5,
+  summaryFunction=mnLogLoss,
+  classProbs =  TRUE
 )
 
 nb_grid <- expand.grid(
@@ -733,11 +759,12 @@ nb_grid <- expand.grid(
 )
 
 nb_model = train(
-  Diabetes_binary ~ ., 
-  data = dplyr::select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary_transformed),
+  Diabetes_binary_transformed ~ ., 
+  data = dplyr::select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
   method = "nb",
   trControl = train_control,
-  tuneGrid = nb_grid
+  tuneGrid = nb_grid,
+  metric="logLoss"
 )
 
 nb_model$results
