@@ -456,17 +456,29 @@ train.control <- trainControl(method = "cv",
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
 
+
 set.seed(2)
-lasso_log_reg<-train(Diabetes_binary ~., 
+
+# Limiting number of features due to performance issues
+lasso_log_reg<-train(#Diabetes_binary ~., 
+                   Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
                    data = dplyr::select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
                    metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
-                                          lambda=seq(0, 1, by = 0.1))
+                                          lambda=seq(0, 1, by = 0.25))
 )
 lasso_log_reg$results
 
 ```
+
+
+
+
+
+
+
+
 
 Obtained the best tuning parameter $\lambda$ value is
 
