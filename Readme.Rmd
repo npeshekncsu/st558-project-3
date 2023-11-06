@@ -8,10 +8,6 @@ params:
 
 
 
-```{r}
-#source("render.R")
-```
-
 # Introduction
 
 This report build for education level `r params$education_level`.
