@@ -117,17 +117,19 @@ Let's look at number of cases with Diabetes and without Diabetes for each age gr
 # TODO: update levels for ages
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), subset$Age)
 ```
+
 Number of cases with Diabetes and without Diabetes for males and females.
 
 ```{r}
 table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
       factor(subset$Sex, labels = c("Female", "Male")))
+
 ```
 
 Linear correlation between numeric variables.
 
 ```{r}
-corrplot(cor(as.matrix(subset %>% select(-Education))), 
+corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))), 
          type="upper", 
          tl.pos = "lt")
 ```
@@ -287,7 +289,7 @@ Calculate log loss for train data set for logistic regression model #1.
 
 ```{r}
 train_predictions = predict(lr_model_1, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -305,7 +307,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(lr_model_1, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -347,7 +349,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(lr_model_2, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -363,7 +365,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(lr_model_2, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -403,7 +405,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(lr_model_3, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -419,7 +421,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(lr_model_3, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -455,7 +457,7 @@ train.control <- trainControl(method = "cv",
 
 set.seed(2)
 lasso_log_reg<-train(Diabetes_binary ~., 
-                   data = select(train_data, -Diabetes_binary_transformed),
+                   data = dplyr::select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
                    #metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
@@ -481,7 +483,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(lasso_log_reg, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -497,7 +499,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(lasso_log_reg, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -526,7 +528,7 @@ train_control <- trainControl(method = "cv",
                         number = 5)
 set.seed(1122)
 tree_model <- train(Diabetes_binary ~ ., 
-                data = select(train_data, -Diabetes_binary_transformed), 
+                data = dplyr::select(train_data, -Diabetes_binary_transformed), 
                 method = "rpart",
                 trControl = train_control,
                 tuneGrid = data.frame(cp=seq(0,.022, by = .001))
@@ -542,7 +544,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(tree_model, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -557,7 +559,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(tree_model, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -591,7 +593,7 @@ train_control <- trainControl(
 set.seed(11)
 rf_model = train(
   Diabetes_binary ~ ., 
-  data = select(train_data, -Diabetes_binary_transformed),
+  data = dplyr::select(train_data, -Diabetes_binary_transformed),
   method = "rf",
   tuneGrid = data.frame(mtry = 1:10),
   trControl = train_control
@@ -611,7 +613,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(rf_model, 
-                             newdata = train_data %>% select(-Diabetes_binary), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -627,7 +629,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(rf_model, 
-                             newdata = val_data %>% select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -667,7 +669,7 @@ svm_grid = expand.grid(
 
 svm_model = train(
   Diabetes_binary_transformed ~ ., 
-  data = select(train_data, -Diabetes_binary),
+  data = dplyr::select(train_data, -Diabetes_binary),
   method = "svmRadial",
   trControl = train_control,
   tuneGrid = svm_grid
@@ -687,7 +689,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(svm_model, 
-                             newdata = train_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -704,7 +706,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(svm_model, 
-                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -732,7 +734,7 @@ nb_grid <- expand.grid(
 
 nb_model = train(
   Diabetes_binary ~ ., 
-  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary_transformed),
+  data = dplyr::select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary_transformed),
   method = "nb",
   trControl = train_control,
   tuneGrid = nb_grid
@@ -747,7 +749,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(nb_model, 
-                             newdata = train_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -764,7 +766,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(nb_model, 
-                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
