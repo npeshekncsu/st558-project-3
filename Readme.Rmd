@@ -2,6 +2,8 @@
 title: "ST558, Project3"
 author: "Jacob Press, Nataliya Peshekhodko"
 date: "`r Sys.Date()`"
+params:
+  education_level: "12"
 ---
 
 
@@ -23,6 +25,7 @@ library(ggplot2)
 library(corrplot)
 library(caret)
 library(Metrics)
+library(klaR)
 ```
 
 
@@ -515,7 +518,62 @@ models_performace_val[["lasso"]] = log_loss_val_lasso
 
 ## Classification tree model
 
-A Classification tree model is a supervised machine learning model used to predict group membership.
+A Classification tree model is a supervised machine learning model used to predict group membership. It has a hierarchical tree structure consisting a root node, branches, internal nodes, and leaf nodes. Classification trees are used when the target variable is categorical. One benefit to classification trees is they are intuitive and usually easy to explain.  
+
+Here is a break down of the tree structure:
+
+  - **Root Node** - The beginning node on the graph.
+  - **Branches** - The arrows connecting the nodes.
+  - **Internal Nodes** - A non-leaf node denoting a test on an attribute.
+  - **Leaf Nodes** - The terminal node displaying the classification.
+
+```{r}
+train_control <- trainControl(method = "cv", 
+                        number = 5)
+set.seed(1122)
+tree_model <- train(Diabetes_binary ~ ., 
+                data = select(train_data, -Diabetes_binary_transformed), 
+                method = "rpart",
+                trControl = train_control,
+                tuneGrid = data.frame(cp=seq(0,.022, by = .001))
+                )
+
+tree_model$results
+```
+
+```{r}
+plot(tree_model)
+```
+Calculate log loss for train data set
+
+```{r}
+train_predictions = predict(tree_model, 
+                             newdata = train_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
+
+log_loss_train_tree = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_tree))
+
+models_performace_train[["classification_tree"]] = log_loss_train_tree
+```
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(tree_model, 
+                             newdata = val_data %>% select(-Diabetes_binary), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
+
+log_loss_val_tree = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_tree))
+
+models_performace_val[["classification_tree"]] = log_loss_val_tree
+```
 
 ## Random forest model
 
@@ -664,7 +722,65 @@ print(paste("Log Loss:", log_loss_val_svm))
 models_performace_val[["svm"]] = log_loss_val_svm
 ```
 
+## New model - Naive Bayes
 
+```{r}
+train_control = trainControl(
+  method = "cv",
+  number = 5,
+)
+
+nb_grid <- expand.grid(
+  usekernel = TRUE,
+  fL = seq(0,1, by = 0.5),
+  adjust = seq(0.5, 1.5, by = 0.5)
+)
+
+nb_model = train(
+  Diabetes_binary ~ ., 
+  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary_transformed),
+  method = "nb",
+  trControl = train_control,
+  tuneGrid = nb_grid
+)
+
+nb_model$results
+nb_model
+```
+
+Calculate log loss for train data set
+
+
+```{r}
+train_predictions = predict(nb_model, 
+                             newdata = train_data %>% select(-Diabetes_binary_transformed), 
+                             type = "prob")
+
+predicted_prob_class1 = train_predictions[, 1]
+true_labels = as.integer(as.character(train_data$Diabetes_binary))
+
+log_loss_train_nb = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_train_nb))
+
+models_performace_train[["Naive Bayes"]] = log_loss_train_nb
+```
+
+
+Calculate log loss for validation data set
+
+```{r}
+val_predictions = predict(nb_model, 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
+                             type = "prob")
+
+predicted_prob_class1 = val_predictions[, 1]
+true_labels = as.integer(as.character(val_data$Diabetes_binary))
+
+log_loss_val_nb = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_nb))
+
+models_performace_val[["Naive Bayes"]] = log_loss_val_nb
+```
 
 
 ```{r}
