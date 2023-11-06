@@ -2,8 +2,6 @@
 title: "ST558, Project3"
 author: "Jacob Press, Nataliya Peshekhodko"
 date: "`r Sys.Date()`"
-params:
-  education_level: "12"
 ---
 
 
