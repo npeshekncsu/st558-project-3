@@ -18,8 +18,8 @@ Packages used:
 
 Links to reports for specified education levels:
 
-  - Never attended school or only kindergarten or Grades 1 - 8 (Elementary) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_12_report)
-  - Grades 9 - 11 (Some high school) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_3_report.html)
+  - Never attended school or only kindergarten or Grades 1 - 8 (Elementary) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_12_report.md)
+  - Grades 9 - 11 (Some high school) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_3_report.md)
   - Grade 12 or GED (High school graduate) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_4_report.html)
-  - College 1 year to 3 years (Some college or technical school) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_5_report.html)
-  - College 4 years or more (College graduate) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_6_report.html)
+  - College 1 year to 3 years (Some college or technical school) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_5_report.md)
+  - College 4 years or more (College graduate) [Report](https://github.com/npeshekncsu/st558-project-3/blob/master/Education_level_6_report.md)
