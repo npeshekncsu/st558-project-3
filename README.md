@@ -1,4 +1,4 @@
-## ST558, Project3
+## ST-558, Project 3
 
 Jacob Press, Nataliya Peshekhodko
 
