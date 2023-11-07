@@ -8,24 +8,32 @@ date: "`r Sys.Date()`"
 
 # Introduction
 
-This report build for education level `r params$education_level`.
+In this project we will read and analyze dataset [Diabetes health indicator dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/) for each education level. We will create different classification models for predicting the `Diabetes_binary` variable. The best model will be choosen based on `log loss` function.
+
+This report is built for education level `r params$education_level`.
 
 # Packages
+
+In order to achive our goals, we will be using the following `R` packages.
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(caret)
 library(ggplot2)
 library(corrplot)
-library(caret)
-library(Metrics)
 library(klaR)
 ```
 
 
+  - `tidyverse` - is a collection of R packages, required for data transformation and manipulation
+  - `caret` - required for training and evaluating machine learning models
+  - `ggplot2` - required for for creating data visualizations and graphics
+  - `corrplot` - required for correlation matrix visualizing
+
+
 # Data
 
-Reading data from `csv` file.
+Reading data from `diabetes_binary_health_indicators_BRFSS2015.csv` file.
 
 ```{r, warning=FALSE, message=FALSE}
 data = read_csv('./data/diabetes_binary_health_indicators_BRFSS2015.csv')
@@ -56,9 +64,9 @@ transformed <- data %>%
 Sub-setting data for the selected education level:
 
 ```{r}
-#education_level = params$education_level
+education_level = params$education_level
 #TODO: remove hard coded value
-education_level = 6
+#education_level = 12
 
 subset <- transformed %>%
   filter(Education == education_level)
@@ -71,7 +79,7 @@ str(subset)
 ```
 
 
-Variables in data set:
+Variables in the data set:
 
   - **Diabetes_binary** - 0 = no diabetes, 1 = diabetes
   - **HighBP** - 0 = no high blood pressure, 1 = high blood pressure
@@ -201,6 +209,14 @@ trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7,
                                   times = 1)
 train_data = subset[trainIndex, ]
 val_data = subset[-trainIndex, ]
+
+
+#Taking sample TEMPORARY. 
+#Will be removed
+#Having performance issues and not able to render for original sizes. 
+#TODO: remove the following lines
+train_data <- train_data[sample(nrow(train_data), size = 500), ]
+val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 
