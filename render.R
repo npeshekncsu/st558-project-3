@@ -1,7 +1,7 @@
 library(rmarkdown)
 
-#params_list = list("12", "3", "4", "5", "6")
-params_list = list("4")
+params_list = list("12", "3", "4", "5", "6")
+#params_list = list("12")
 
 for (level in params_list) {
   params = list(education_level = level)
