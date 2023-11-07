@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-06
+2023-11-07
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -36,21 +36,37 @@ Jacob Press, Nataliya Peshekhodko
     Vector Machine</a>
   - <a href="#57-new-model---naive-bayes"
     id="toc-57-new-model---naive-bayes">5.7 New model - Naive Bayes</a>
+- <a href="#6-summary" id="toc-6-summary">6 Summary</a>
 
 # 1 Introduction
 
 In this project we will read and analyze dataset [Diabetes health
 indicator
 dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
-for each education level. We will create different classification models
-for predicting the `Diabetes_binary` variable. The best model will be
-choosen based on `log loss` function.
+for each education level as specified by
+[EDUCA](https://www.icpsr.umich.edu/web/NAHDAP/studies/34085/datasets/0001/variables/EDUCA?archive=NAHDAP).
+**Level 1** (Never attended school or only kindergarten) and **Level 2**
+(Grades 1 - 8) will be combined. We will create different classification
+models for predicting the `Diabetes_binary` variable. The best model
+will be chosen based on `log loss` function.
 
-This report is built for education level 3.
+Levels of educations based on EDUCA
+
+``` r
+education_levels=list()
+education_levels[['Never attended school or only kindergarten or Grades 1-8']] = '12'
+education_levels[['Grades 9-11 (Some high school)']] = '3'
+education_levels[['Grade 12 or GED (High school graduate)']] = '4'
+education_levels[['College 1 year to 3 years (Some college or technical school)']] = '5'
+education_levels[['College 4 years or more (College graduate)']] = '6'
+```
+
+This report is built for education level **Grades 9-11 (Some high
+school)**.
 
 # 2 Packages
 
-In order to achive our goals, we will be using the following `R`
+In order to achieve our goals, we will be using the following `R`
 packages.
 
 ``` r
@@ -115,8 +131,6 @@ Sub-setting data for the selected education level:
 
 ``` r
 education_level = params$education_level
-#TODO: remove hard coded value
-#education_level = 12
 
 subset <- transformed %>%
   filter(Education == education_level)
@@ -216,20 +230,29 @@ ggplot(data = subset, aes(x = Age)) +
        y = "Frequency")
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 Let’s look at number of cases with Diabetes and without Diabetes for
 each age group for the selected education level
 
 ``` r
-# TODO: update levels for ages
-table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), subset$Age)
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      factor(subset$Age, labels = c("Age 18 - 24", "Age 25 to 29", "Age 30 to 34", 
+                                    "Age 35 to 39", "Age 40 to 44",
+                                    "Age 45 to 49", "Age 50 to 54",
+                                    "Age 55 to 59", "Age 60 to 64", 
+                                    "Age 65 to 69", "Age 70 to 74",
+                                    "Age 75 to 79", "Age 80 or older")) )
 ```
 
     ##            
-    ##               1   2   3   4   5   6   7   8   9  10  11  12  13
-    ##   No diabet 189 182 350 380 445 504 766 795 713 702 740 639 777
-    ##   Diabet      4  10  23  38  71 115 209 292 321 320 354 273 266
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59
+    ##   No diabet         189          182          350          380          445          504          766          795
+    ##   Diabet              4           10           23           38           71          115          209          292
+    ##            
+    ##             Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
+    ##   No diabet          713          702          740          639             777
+    ##   Diabet             321          320          354          273             266
 
 Number of cases with Diabetes and without Diabetes for males and
 females.
@@ -252,21 +275,20 @@ corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))),
          tl.pos = "lt")
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 Number of cases with Diabetes and without Diabetes for each general
 health level.
 
 ``` r
-#TODO: update levels
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
-      subset$GenHlth)
+      factor(subset$GenHlth, labels = c("Excellent", "Very good", "Good", "Fair", "Poor")) )
 ```
 
     ##            
-    ##                1    2    3    4    5
-    ##   No diabet  644 1379 2577 1786  796
-    ##   Diabet      66  194  656  840  540
+    ##             Excellent Very good Good Fair Poor
+    ##   No diabet       644      1379 2577 1786  796
+    ##   Diabet           66       194  656  840  540
 
 Number of cases with Diabetes and without Diabetes for high blood
 pressure and normal blood pressure patients.
@@ -304,10 +326,30 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary),
   geom_boxplot() +
   labs(title = "BMI distribution for patients with and without diabetes", 
        x = "Diabetes", 
-       y = "BMI")
+       y = "BMI") +
+  scale_fill_manual(values = c("0" = "grey", "1" = "red"),
+                    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")) +
+  labs(fill = "Diabetes Status")
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+``` r
+ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by GenHlth Level",
+    x = "GenHlth Level",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) + 
+  labs(fill = "Diabetes Status")
+```
+
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 # 5 Modeling
 
@@ -795,7 +837,7 @@ Plot obtained accuracy for different $\lambda$ values.
 plot(lasso_log_reg)
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 Calculate log loss for train data set
 
@@ -899,7 +941,7 @@ tree_model$results
 plot(tree_model)
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 Calculate log loss for train data set
 
 ``` r
@@ -1006,7 +1048,7 @@ rf_model$results
 plot(rf_model)
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 Calculate log loss for train data set
 
@@ -1141,7 +1183,7 @@ svm_model
 plot(svm_model)
 ```
 
-![](Education_level_3_report_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+![](Education_level_3_report_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 ``` r
 svm_model$bestTune
@@ -1370,3 +1412,5 @@ print (names(models_performace_val)[which.min(unlist(models_performace_val))])
 ```
 
     ## [1] "svm"
+
+# 6 Summary

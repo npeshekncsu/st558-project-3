@@ -8,13 +8,25 @@ date: "`r Sys.Date()`"
 
 # Introduction
 
-In this project we will read and analyze dataset [Diabetes health indicator dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/) for each education level. We will create different classification models for predicting the `Diabetes_binary` variable. The best model will be choosen based on `log loss` function.
+In this project we will read and analyze dataset [Diabetes health indicator dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/) for each education level as specified by [EDUCA](https://www.icpsr.umich.edu/web/NAHDAP/studies/34085/datasets/0001/variables/EDUCA?archive=NAHDAP). **Level 1** (Never attended school or only kindergarten) and **Level 2** (Grades 1 - 8) will be combined. We will create different classification models for predicting the `Diabetes_binary` variable. The best model will be chosen based on `log loss` function.
 
-This report is built for education level `r params$education_level`.
+Levels of educations based on EDUCA
+
+```{r}
+education_levels=list()
+education_levels[['Never attended school or only kindergarten or Grades 1-8']] = '12'
+education_levels[['Grades 9-11 (Some high school)']] = '3'
+education_levels[['Grade 12 or GED (High school graduate)']] = '4'
+education_levels[['College 1 year to 3 years (Some college or technical school)']] = '5'
+education_levels[['College 4 years or more (College graduate)']] = '6'
+```
+
+
+This report is built for education level **`r names(unlist(education_levels))[unlist(education_levels) == params$education_level]`**.
 
 # Packages
 
-In order to achive our goals, we will be using the following `R` packages.
+In order to achieve our goals, we will be using the following `R` packages.
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -65,8 +77,6 @@ Sub-setting data for the selected education level:
 
 ```{r}
 education_level = params$education_level
-#TODO: remove hard coded value
-#education_level = 12
 
 subset <- transformed %>%
   filter(Education == education_level)
@@ -126,8 +136,13 @@ ggplot(data = subset, aes(x = Age)) +
 Let's look at number of cases with Diabetes and without Diabetes for each age group for the selected education level
 
 ```{r}
-# TODO: update levels for ages
-table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), subset$Age)
+table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
+      factor(subset$Age, labels = c("Age 18 - 24", "Age 25 to 29", "Age 30 to 34", 
+                                    "Age 35 to 39", "Age 40 to 44",
+                                    "Age 45 to 49", "Age 50 to 54",
+                                    "Age 55 to 59", "Age 60 to 64", 
+                                    "Age 65 to 69", "Age 70 to 74",
+                                    "Age 75 to 79", "Age 80 or older")) )
 ```
 
 Number of cases with Diabetes and without Diabetes for males and females.
@@ -149,9 +164,8 @@ corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))),
 Number of cases with Diabetes and without Diabetes for each general health level.
 
 ```{r}
-#TODO: update levels
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
-      subset$GenHlth)
+      factor(subset$GenHlth, labels = c("Excellent", "Very good", "Good", "Fair", "Poor")) )
 ```
 Number of cases with Diabetes and without Diabetes for high blood pressure and normal blood pressure patients.
 
@@ -176,7 +190,33 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary),
   geom_boxplot() +
   labs(title = "BMI distribution for patients with and without diabetes", 
        x = "Diabetes", 
-       y = "BMI")
+       y = "BMI") +
+  scale_fill_manual(values = c("0" = "grey", "1" = "red"),
+                    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")) +
+  labs(fill = "Diabetes Status")
+
+
+
+
+
+
+
+
+```
+
+```{r}
+ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by GenHlth Level",
+    x = "GenHlth Level",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) + 
+  labs(fill = "Diabetes Status")
 ```
 
 
@@ -848,3 +888,7 @@ The best performed model based on validation data set is
 ```{r}
 print (names(models_performace_val)[which.min(unlist(models_performace_val))])
 ```
+
+
+
+# Summary

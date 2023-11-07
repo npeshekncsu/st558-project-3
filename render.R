@@ -18,5 +18,3 @@ for (level in params_list) {
     )
   )
 }
-
-  
