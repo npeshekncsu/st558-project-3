@@ -219,6 +219,57 @@ ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), gr
   labs(fill = "Diabetes Status")
 ```
 
+Visualization of the proportion with and without diabetes grouped by Age for the given education level. It appears the proportion of with diabetes increases with age, which is not surprising.  
+
+```{r}
+ggplot(subset, aes(x = as.factor(Age), y = 1, fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "fill", stat = "identity") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by Age",
+    x = "Age",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) +
+  labs(fill = "Diabetes Status")
+```
+
+Visualization showing the distribution of `Diabetes_binary` by `BMI`.  
+
+```{r}
+ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary,fill = Diabetes_binary)) + 
+  labs(
+    title = "Violin Plot of Diabetes Status by BMI",
+    x = "Diabetes Status",
+    y = "BMI Scale"
+  ) +
+  geom_violin(trim = FALSE) + 
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+    ) + 
+  labs(fill = "Diabetes Status")
+  
+```
+Visualization showing the counts of `Diabetes_binary` by `Income` for the given education level.  
+
+```{r}
+ggplot(subset, aes(x = as.factor(Income), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "stack") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by Income",
+    x = "Income",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) +
+  labs(fill = "Diabetes Status")
+
+```
 
 
 # Modeling
@@ -811,6 +862,17 @@ models_performace_val[["svm"]] = log_loss_val_svm
 ```
 
 ## New model - Naive Bayes
+
+The naive Bayes model is a popular supervised machine learning algorithm used for classification. An advantage of a naive bayes model is it can require a smaller portion of training data to predict classification. But naive bayes may be out performed by other models such as boosted trees and random forests. A break down of Bayes theorem below:
+
+$$ P(c|x) = \frac{P(x|c)*P(c)}{P(x)}$$
+Where:
+
+  - $P(c|x)$ is the posterior probability of C (class membership) given x (predictor).
+  - $P(c)$ prior probability of class membership.
+  - $P(x|c)$ is the probability of the predictor given class membership.
+  - $P(x)$ is the prior probability of the predictor.
+
 
 ```{r}
 train_control = trainControl(
