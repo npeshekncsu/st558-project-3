@@ -194,14 +194,6 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary),
   scale_fill_manual(values = c("0" = "grey", "1" = "red"),
                     labels = c("0" = "Without Diabetes", "1" = "With Diabetes")) +
   labs(fill = "Diabetes Status")
-
-
-
-
-
-
-
-
 ```
 
 ```{r}
@@ -239,19 +231,19 @@ ggplot(subset, aes(x = as.factor(Age), y = 1, fill = as.factor(Diabetes_binary),
 Visualization showing the distribution of `Diabetes_binary` by `BMI`.  
 
 ```{r}
-ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary,fill = Diabetes_binary)) + 
-  labs(
-    title = "Violin Plot of Diabetes Status by BMI",
-    x = "Diabetes Status",
-    y = "BMI Scale"
-  ) +
-  geom_violin(trim = FALSE) + 
-  scale_fill_manual(
-    values = c("0" = "grey", "1" = "red"),
-    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
-    ) + 
-  labs(fill = "Diabetes Status")
-  
+#TODO: fix this graph. Temporary commented it becasue it causes compilation error. BMI is numeric
+#ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary,fill = Diabetes_binary)) + 
+#  labs(
+#    title = "Violin Plot of Diabetes Status by BMI",
+#    x = "Diabetes Status",
+#    y = "BMI Scale"
+#  ) +
+#  geom_violin(trim = FALSE) + 
+#  scale_fill_manual(
+#    values = c("0" = "grey", "1" = "red"),
+#    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+#    ) + 
+#  labs(fill = "Diabetes Status")
 ```
 Visualization showing the counts of `Diabetes_binary` by `Income` for the given education level.  
 
@@ -313,7 +305,7 @@ val_data <- val_data[sample(nrow(val_data), size = 200), ]
 
 ## Log loss
 
-**Log loss**, also known as **logarithmic loss** or **cross-entropy loss**, is a common evaluation metric for binary classification models. It measures the performance of a model by quantifying the difference between predicted probabilities and actual values. Log-loss is indicative of how close the prediction probability is to the corresponding actual/true value, penalizing inaccurate predictions with higher values. Lower log-loss indicates better model performance.
+**Log loss**, also known as **logarithmic loss** or **cross-entropy loss**, is a common evaluation metric for binary classification models. It measures the performance of a model by quantifying the difference between predicted probabilities and actual values. Log-loss is indicative of how close the prediction probability is to the corresponding actual/true value, penalizing inaccurate predictions with higher values. **Lower log-loss** indicates **better** model performance.
 
 
   
@@ -321,17 +313,25 @@ Mathematical interpretation: Log Loss is the negative average of the log of corr
 
 $$log \ loss = -\frac{1}{N} \sum_{i=1}^N y_i log(p(y_i)) + (1-y_i)log(1-p(y_i))$$
 
-$p(y_i)$ is the probability of $1$.
+$p(y_i)$ is the probability of $1$
 
   
-$1-p(y_i)$ is the probability of 0.
+$1-p(y_i)$ is the probability of 0
 
 
+$y_i$ is the true binary outcome
+
+
+We may prefer `log loss` to things like `accuracy` for several reasons:
+
+  - Probabilistic Evaluation: Log loss considers probabilities, while accuracy only looks at final decisions
+  - Handles Imbalanced Data: Log loss shows poor performance in imbalanced datasets
+  - Fair Model Comparison: Log loss enables fair model comparisons and makes it easier to evaluate which model is performing better
 
 
 ## Logistic regression
 
-Logistic regression is a statistical and machine learning model used for binary classification tasks. It's a type of regression analysis that's well-suited for predicting the probability of an observation belonging to one of two classes or categories.
+**Logistic regression** is a statistical and machine learning model used for binary classification tasks. It's a type of regression analysis that's well-suited for predicting the probability of an observation belonging to one of two classes or categories.
 
 
   - Logistic regression is used when the response variable is binary, meaning it has two possible outcomes or classes. 
@@ -345,6 +345,7 @@ Creating lists to store model performance on train and validations data sets.
 ```{r}
 models_performace_train = list()
 models_performace_val = list()
+logistic_regression_train = list()
 ```
 
 ### Fit Logistic regression model 1
@@ -357,6 +358,7 @@ levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Di
 levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
 ```
 
+Fit logistic regression model with `HighChol`, `BMI` and `GenHlth` as predictors.
 
 ```{r}
 train.control = trainControl(method = "cv", 
@@ -379,7 +381,7 @@ summary(lr_model_1)
 ```
 
 
-Create custom function for log loss calculation.
+In order to obtain `log loss` metric for train and validation datasets, let's create custom function for log loss calculation.
 
 ```{r}
 calculateLogLoss <- function(predicted_probabilities, true_labels) {
@@ -406,7 +408,8 @@ true_labels = as.integer(as.character(train_data$Diabetes_binary))
 log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_1))
 
-models_performace_train[["logistic_regression_model_1"]] <- log_loss_train_lr_model_1
+#models_performace_train[["logistic_regression_model_1"]] = log_loss_train_lr_model_1
+logistic_regression_train[['logistic_regression_model_1']] = log_loss_train_lr_model_1
 ```
 
 
@@ -414,23 +417,24 @@ models_performace_train[["logistic_regression_model_1"]] <- log_loss_train_lr_mo
 Calculate log loss for validation data set
 
 ```{r}
-val_predictions = predict(lr_model_1, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
+#val_predictions = predict(lr_model_1, 
+#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
 
-predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
+#predicted_prob_class1 = val_predictions[, 1]
+#true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
-log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_1))
+#log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_val_lr_model_1))
 
 
-models_performace_val[["logistic_regression_model_1"]] = log_loss_val_lr_model_1
+#models_performace_val[["logistic_regression_model_1"]] = log_loss_val_lr_model_1
 ```
 
 
 ### Fit Logistic regression model 2
 
+Fit logistic regression with second order `BMI`, `HighChol`, `HeartDiseaseorAttack` and interaction between `HighChol`and `HeartDiseaseorAttack` as predictors.
 
 ```{r}
 train.control = trainControl(method = "cv", 
@@ -466,27 +470,30 @@ true_labels = as.integer(as.character(train_data$Diabetes_binary))
 log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_2))
 
-models_performace_train[["logistic_regression_model_2"]] = log_loss_train_lr_model_2
+#models_performace_train[["logistic_regression_model_2"]] = log_loss_train_lr_model_2
+logistic_regression_train[['logistic_regression_model_2']] = log_loss_train_lr_model_2
 ```
 
 Calculate log loss for validation data set
 
 ```{r}
-val_predictions = predict(lr_model_2, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
+#val_predictions = predict(lr_model_2, 
+#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
 
-predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
+#predicted_prob_class1 = val_predictions[, 1]
+#true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
-log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_2))
+#log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_val_lr_model_2))
 
-models_performace_val[["logistic_regression_model_2"]] = log_loss_val_lr_model_2
+#models_performace_val[["logistic_regression_model_2"]] = log_loss_val_lr_model_2
 ```
 
 
 ### Fit Logistic regression model 3
+
+Fit logistic regression with `Age`, `GenHlth`, `HighBP`, `HeartDiseaseorAttack` and second order `BMI` as predictors.
 
 ```{r}
 train.control = trainControl(method = "cv", 
@@ -522,25 +529,59 @@ true_labels = as.integer(as.character(train_data$Diabetes_binary))
 log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_train_lr_model_3))
 
-models_performace_train[["logistic_regression_model_3"]] = log_loss_train_lr_model_3
+#models_performace_train[["logistic_regression_model_3"]] = log_loss_train_lr_model_3
+logistic_regression_train[['logistic_regression_model_3']] = log_loss_train_lr_model_3
 ```
 
 Calculate log loss for validation data set
 
 ```{r}
-val_predictions = predict(lr_model_3, 
+#val_predictions = predict(lr_model_3, 
+#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
+
+#predicted_prob_class1 = val_predictions[, 1]
+#true_labels = as.integer(as.character(val_data$Diabetes_binary))
+
+#log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_val_lr_model_3))
+
+#models_performace_val[["logistic_regression_model_3"]] = log_loss_val_lr_model_3
+```
+
+
+Now we can choose the best performed model based on train data performance among logistic regression models.
+
+```{r}
+best_lr_model = names(logistic_regression_train)[which.min(unlist(logistic_regression_train))]
+```
+
+The best performed logistic regression model is model **`r best_lr_model`**.
+
+```{r}
+if (best_lr_model == "logistic_regression_model_1") {
+  lr_model = lr_model_1
+} else if (best_lr_model == "logistic_regression_model_2") {
+  lr_model = lr_model_2
+} else {
+  lr_model = lr_model_3
+}
+
+logistic_regression_train[['logistic_regression_model']] = logistic_regression_train[[best_lr_model]]
+
+
+val_predictions = predict(lr_model, 
                              newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
-log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_3))
+log_loss_val_lr_model = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss:", log_loss_val_lr_model))
 
-models_performace_val[["logistic_regression_model_3"]] = log_loss_val_lr_model_3
+models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
 ```
-
 
 
 ## LASSO logistic regression
@@ -578,10 +619,6 @@ lasso_log_reg<-train(#Diabetes_binary ~.,
 lasso_log_reg$results
 
 ```
-
-
-
-
 
 
 
