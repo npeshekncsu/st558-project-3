@@ -398,18 +398,18 @@ calculateLogLoss <- function(predicted_probabilities, true_labels) {
 Calculate log loss for train data set for logistic regression model #1.
 
 ```{r}
-train_predictions = predict(lr_model_1, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
+#train_predictions = predict(lr_model_1, 
+#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
 
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
-log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_1))
+#log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_lr_model_1))
 
 #models_performace_train[["logistic_regression_model_1"]] = log_loss_train_lr_model_1
-logistic_regression_train[['logistic_regression_model_1']] = log_loss_train_lr_model_1
+logistic_regression_train[['logistic_regression_model_1']] = lr_model_1$results$logLoss
 ```
 
 
@@ -460,18 +460,20 @@ summary(lr_model_2)
 Calculate log loss for train data set
 
 ```{r}
-train_predictions = predict(lr_model_2, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
+#train_predictions = predict(lr_model_2, 
+#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
 
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
-log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_2))
+#log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_lr_model_2))
 
 #models_performace_train[["logistic_regression_model_2"]] = log_loss_train_lr_model_2
-logistic_regression_train[['logistic_regression_model_2']] = log_loss_train_lr_model_2
+#logistic_regression_train[['logistic_regression_model_2']] = log_loss_train_lr_model_2
+
+logistic_regression_train[['logistic_regression_model_2']] = lr_model_2$results$logLoss
 ```
 
 Calculate log loss for validation data set
@@ -519,18 +521,20 @@ summary(lr_model_3)
 Calculate log loss for train data set
 
 ```{r}
-train_predictions = predict(lr_model_3, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
+#train_predictions = predict(lr_model_3, 
+#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
+#                             type = "prob")
 
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
-log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_3))
+#log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_lr_model_3))
 
 #models_performace_train[["logistic_regression_model_3"]] = log_loss_train_lr_model_3
-logistic_regression_train[['logistic_regression_model_3']] = log_loss_train_lr_model_3
+#logistic_regression_train[['logistic_regression_model_3']] = log_loss_train_lr_model_3
+
+logistic_regression_train[['logistic_regression_model_3']] = lr_model_3$results$logLoss
 ```
 
 Calculate log loss for validation data set
@@ -583,6 +587,9 @@ print(paste("Log Loss:", log_loss_val_lr_model))
 models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
 ```
 
+```{r}
+lr_model$results$logLoss
+```
 
 ## LASSO logistic regression
 
