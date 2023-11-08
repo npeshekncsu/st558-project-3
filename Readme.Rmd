@@ -150,7 +150,6 @@ Number of cases with Diabetes and without Diabetes for males and females.
 ```{r}
 table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
       factor(subset$Sex, labels = c("Female", "Male")))
-
 ```
 
 Linear correlation between numeric variables.
@@ -245,6 +244,7 @@ Visualization showing the distribution of `Diabetes_binary` by `BMI`.
 #    ) + 
 #  labs(fill = "Diabetes Status")
 ```
+
 Visualization showing the counts of `Diabetes_binary` by `Income` for the given education level.  
 
 ```{r}
@@ -350,6 +350,8 @@ logistic_regression_train = list()
 
 ### Fit Logistic regression model 1
 
+Before we can fit logistic regression models, we need to transform response variable to the format `train` function expects using function `make.names`. 
+
 ```{r}
 train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
 val_data$Diabetes_binary_transformed = val_data$Diabetes_binary
@@ -380,55 +382,10 @@ lr_model_1 = train(Diabetes_binary_transformed ~
 summary(lr_model_1)
 ```
 
-
-In order to obtain `log loss` metric for train and validation datasets, let's create custom function for log loss calculation.
-
-```{r}
-calculateLogLoss <- function(predicted_probabilities, true_labels) {
-  predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
-                                 1e-15)
-
-  log_loss <- -mean(true_labels * log(predicted_probabilities) + 
-                      (1 - true_labels) * log(1 - predicted_probabilities))
-  return(log_loss)
-}
-```
-
-
-Calculate log loss for train data set for logistic regression model #1.
+Obtain `log loss` for train data set for logistic regression model #1.
 
 ```{r}
-#train_predictions = predict(lr_model_1, 
-#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = train_predictions[, 1]
-#true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-#log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_train_lr_model_1))
-
-#models_performace_train[["logistic_regression_model_1"]] = log_loss_train_lr_model_1
 logistic_regression_train[['logistic_regression_model_1']] = lr_model_1$results$logLoss
-```
-
-
-
-Calculate log loss for validation data set
-
-```{r}
-#val_predictions = predict(lr_model_1, 
-#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = val_predictions[, 1]
-#true_labels = as.integer(as.character(val_data$Diabetes_binary))
-
-#log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_val_lr_model_1))
-
-
-#models_performace_val[["logistic_regression_model_1"]] = log_loss_val_lr_model_1
 ```
 
 
@@ -457,39 +414,10 @@ summary(lr_model_2)
 ```
 
 
-Calculate log loss for train data set
+Obtain `log loss` for train data set for logistic regression model #2.
 
 ```{r}
-#train_predictions = predict(lr_model_2, 
-#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = train_predictions[, 1]
-#true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-#log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_train_lr_model_2))
-
-#models_performace_train[["logistic_regression_model_2"]] = log_loss_train_lr_model_2
-#logistic_regression_train[['logistic_regression_model_2']] = log_loss_train_lr_model_2
-
 logistic_regression_train[['logistic_regression_model_2']] = lr_model_2$results$logLoss
-```
-
-Calculate log loss for validation data set
-
-```{r}
-#val_predictions = predict(lr_model_2, 
-#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = val_predictions[, 1]
-#true_labels = as.integer(as.character(val_data$Diabetes_binary))
-
-#log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_val_lr_model_2))
-
-#models_performace_val[["logistic_regression_model_2"]] = log_loss_val_lr_model_2
 ```
 
 
@@ -518,49 +446,22 @@ lr_model_3 = train(Diabetes_binary_transformed ~ Income+
 summary(lr_model_3)
 ```
 
-Calculate log loss for train data set
+Obtain `log loss` for train data set for logistic regression model #3.
 
 ```{r}
-#train_predictions = predict(lr_model_3, 
-#                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = train_predictions[, 1]
-#true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-#log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_train_lr_model_3))
-
-#models_performace_train[["logistic_regression_model_3"]] = log_loss_train_lr_model_3
-#logistic_regression_train[['logistic_regression_model_3']] = log_loss_train_lr_model_3
-
 logistic_regression_train[['logistic_regression_model_3']] = lr_model_3$results$logLoss
 ```
 
-Calculate log loss for validation data set
 
-```{r}
-#val_predictions = predict(lr_model_3, 
-#                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-#                             type = "prob")
-
-#predicted_prob_class1 = val_predictions[, 1]
-#true_labels = as.integer(as.character(val_data$Diabetes_binary))
-
-#log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-#print(paste("Log Loss:", log_loss_val_lr_model_3))
-
-#models_performace_val[["logistic_regression_model_3"]] = log_loss_val_lr_model_3
-```
-
-
-Now we can choose the best performed model based on train data performance among logistic regression models.
+Now we can choose the best performed model based on train dataset performance among logistic regression models.
 
 ```{r}
 best_lr_model = names(logistic_regression_train)[which.min(unlist(logistic_regression_train))]
 ```
 
 The best performed logistic regression model is model **`r best_lr_model`**.
+
+Save the logistic regression model performance on training dataset.
 
 ```{r}
 if (best_lr_model == "logistic_regression_model_1") {
@@ -571,9 +472,29 @@ if (best_lr_model == "logistic_regression_model_1") {
   lr_model = lr_model_3
 }
 
-logistic_regression_train[['logistic_regression_model']] = logistic_regression_train[[best_lr_model]]
+models_performace_train[['logistic_regression_model']] = lr_model$results$logLoss
+
+print(paste("Log Loss for logistic regression model for training dataset:", 
+            models_performace_train[['logistic_regression_model']]))
+```
 
 
+In order to obtain `log loss` metric for validation dataset, let's create custom function for log loss calculation.
+
+```{r}
+calculateLogLoss <- function(predicted_probabilities, true_labels) {
+  predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
+                                 1e-15)
+
+  log_loss <- -mean(true_labels * log(predicted_probabilities) + 
+                      (1 - true_labels) * log(1 - predicted_probabilities))
+  return(log_loss)
+}
+```
+
+Calculate and save logistic regression model performance on validation dataset.
+
+```{r}
 val_predictions = predict(lr_model, 
                              newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
@@ -582,14 +503,12 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lr_model = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model))
+print(paste("Log Loss for logistic regression model for validation dataset:", 
+            log_loss_val_lr_model))
 
 models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
 ```
 
-```{r}
-lr_model$results$logLoss
-```
 
 ## LASSO logistic regression
 
@@ -624,12 +543,7 @@ lasso_log_reg<-train(#Diabetes_binary ~.,
                                           lambda=seq(0, 1, by = 0.25))
 )
 lasso_log_reg$results
-
 ```
-
-
-
-
 
 Obtained the best tuning parameter $\lambda$ value is
 
@@ -642,6 +556,7 @@ Plot obtained accuracy for different $\lambda$ values.
 ```{r}
 plot(lasso_log_reg)
 ```
+
 
 Calculate log loss for train data set
 
@@ -708,26 +623,20 @@ tree_model$results
 ```{r}
 plot(tree_model)
 ```
-Calculate log loss for train data set
+
+Obtain log loss for train data set
 
 ```{r}
-train_predictions = predict(tree_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_tree = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_tree))
-
-models_performace_train[["classification_tree"]] = log_loss_train_tree
+models_performace_train[["classification_tree"]] = min(tree_model$results$logLoss)
+print(paste("Log Loss for classification tree model for training dataset:", 
+            models_performace_train[["classification_tree"]]))
 ```
+
 Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(tree_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -789,17 +698,8 @@ Calculate log loss for train data set
 
 
 ```{r}
-train_predictions = predict(rf_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_rf))
-
-models_performace_train[["random_forest"]] = log_loss_train_rf
+models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
+print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
 ```
 
 Calculate log loss for validation data set
@@ -816,6 +716,7 @@ log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_rf))
 
 models_performace_val[["random_forest"]] = log_loss_val_rf
+log_loss_val_rf
 ```
 
 
@@ -858,7 +759,7 @@ svm_model = train(
   metric="logLoss",
   tuneGrid = svm_grid
 )
-svm_model
+svm_model$results
 ```
 
 
@@ -875,17 +776,19 @@ Calculate log loss for train data set
 
 
 ```{r}
-train_predictions = predict(svm_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
-                             type = "prob")
+#train_predictions = predict(svm_model, 
+#                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
+#                             type = "prob")
 
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
-log_loss_train_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_svm))
+#log_loss_train_svm = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_svm))
 
-models_performace_train[["svm"]] = log_loss_train_svm
+models_performace_train[["svm"]] = min(svm_model$results$logLoss)
+print(paste("Log Loss for support vector machine model for training dataset", 
+            models_performace_train[["svm"]]))
 ```
 
 
@@ -900,7 +803,7 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_svm))
+print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
 
 models_performace_val[["svm"]] = log_loss_val_svm
 ```
@@ -942,24 +845,34 @@ nb_model = train(
 )
 
 nb_model$results
-nb_model
 ```
+
+```{r}
+plot(nb_model)
+```
+
+```{r}
+nb_model$results$logLoss
+```
+
 
 Calculate log loss for train data set
 
 
 ```{r}
-train_predictions = predict(nb_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
-                             type = "prob")
+#train_predictions = predict(nb_model, 
+#                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
+#                             type = "prob")
 
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
+#predicted_prob_class1 = train_predictions[, 1]
+#true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
-log_loss_train_nb = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_nb))
+#log_loss_train_nb = calculateLogLoss(predicted_prob_class1, true_labels)
+#print(paste("Log Loss:", log_loss_train_nb))
 
-models_performace_train[["Naive Bayes"]] = log_loss_train_nb
+models_performace_train[["Naive Bayes"]] = min(nb_model$results$logLoss)
+print(paste("Log Loss for naive bayes model for training dataset", 
+            models_performace_train[["Naive Bayes"]]))
 ```
 
 
@@ -974,23 +887,29 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_nb = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_nb))
+print(paste("Log Loss for naive bayes model for validation dataset", 
+            log_loss_val_nb))
 
 models_performace_val[["Naive Bayes"]] = log_loss_val_nb
 ```
 
+Model performance on training dataset based on `log loss` metric:
 
 ```{r}
 models_performace_train
+```
+
+Model performance on validation dataset based on `log loss` metric:
+```{r}
 models_performace_val
 ```
 
-The best performed model based on train data set is 
+The best performed model based on train data set is  **`r names(models_performace_train)[which.min(unlist(models_performace_train))]`**.
 ```{r}
 print (names(models_performace_train)[which.min(unlist(models_performace_train))])
 ```
 
-The best performed model based on validation data set is
+The best performed model based on validation data set is **`r names(models_performace_val)[which.min(unlist(models_performace_val))]`**.
 ```{r}
 print (names(models_performace_val)[which.min(unlist(models_performace_val))])
 ```
