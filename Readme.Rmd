@@ -33,7 +33,6 @@ library(tidyverse)
 library(caret)
 library(ggplot2)
 library(corrplot)
-library(klaR)
 ```
 
 
@@ -117,13 +116,13 @@ Variables in the data set:
 
 # Explanatory Data Analysis(EDA)
 
-First, let's look at number of thr records with Diabetes and without Diabetes for the selected education level:
+First, let's look at number of the records with Diabetes and without Diabetes for the selected education level:
 
 ```{r}
 table (factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")) )
 ```
 
-Let's look at `Age` distribution for the selected education level:
+Let's look at `Age` distribution for the selected education level and check if all age groups are presented equally in the subset of data. 
 
 ```{r, message=FALSE}
 ggplot(data = subset, aes(x = Age)) +
@@ -133,7 +132,7 @@ ggplot(data = subset, aes(x = Age)) +
        y = "Frequency")
 ```
 
-Let's look at number of cases with Diabetes and without Diabetes for each age group for the selected education level
+Let's look at number of cases with Diabetes and without Diabetes for each age group for the selected education level.
 
 ```{r}
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
@@ -145,14 +144,14 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
                                     "Age 75 to 79", "Age 80 or older")) )
 ```
 
-Number of cases with Diabetes and without Diabetes for males and females.
+Let's check if number of cases with Diabetes and without Diabetes are equal for males and females for the selected subset of data.
 
 ```{r}
 table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
       factor(subset$Sex, labels = c("Female", "Male")))
 ```
 
-Linear correlation between numeric variables.
+Linear correlation between numeric variables allows to check which variables are correlated with target variable `Diabetes_binary` and could be used as predictors in the models.
 
 ```{r}
 corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))), 
@@ -164,7 +163,8 @@ Number of cases with Diabetes and without Diabetes for each general health level
 
 ```{r}
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
-      factor(subset$GenHlth, labels = c("Excellent", "Very good", "Good", "Fair", "Poor")) )
+      factor(subset$GenHlth, labels = c("Excellent", "Very good", 
+                                        "Good", "Fair", "Poor")) )
 ```
 Number of cases with Diabetes and without Diabetes for high blood pressure and normal blood pressure patients.
 
@@ -194,6 +194,8 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary),
                     labels = c("0" = "Without Diabetes", "1" = "With Diabetes")) +
   labs(fill = "Diabetes Status")
 ```
+
+Let's plot number of cases with Diabetes and Without Diabetes for each General Health level for the selected sunset of data.
 
 ```{r}
 ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
@@ -266,7 +268,7 @@ ggplot(subset, aes(x = as.factor(Income), fill = as.factor(Diabetes_binary), gro
 
 # Modeling
 
-Converting some of the variables to factors.
+Converting some of the variables to factors and checking dataset structure.
 
 ```{r}
 names = c('HighBP' ,'HighChol', 
@@ -283,7 +285,7 @@ str(subset)
 ```
 
 
-Spiting up data training and validation data sets.
+Splitting up data into training and validation datasets.
 
 ```{r}
 set.seed(5)
@@ -298,8 +300,8 @@ val_data = subset[-trainIndex, ]
 #Will be removed
 #Having performance issues and not able to render for original sizes. 
 #TODO: remove the following lines
-#train_data <- train_data[sample(nrow(train_data), size = 500), ]
-#val_data <- val_data[sample(nrow(val_data), size = 200), ]
+train_data <- train_data[sample(nrow(train_data), size = 500), ]
+val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 
@@ -324,9 +326,9 @@ $y_i$ is the true binary outcome
 
 We may prefer `log loss` to things like `accuracy` for several reasons:
 
-  - Probabilistic Evaluation: Log loss considers probabilities, while accuracy only looks at final decisions
-  - Handles Imbalanced Data: Log loss shows poor performance in imbalanced datasets
-  - Fair Model Comparison: Log loss enables fair model comparisons and makes it easier to evaluate which model is performing better
+  - **Probabilistic Evaluation** - Log loss considers probabilities, while accuracy only looks at final decisions
+  - **Handles Imbalanced Data** - Log loss shows poor performance in imbalanced datasets
+  - **Fair Model Comparison** - Log loss enables fair model comparisons and makes it easier to evaluate which model is performing better
 
 
 ## Logistic regression
@@ -340,7 +342,7 @@ We may prefer `log loss` to things like `accuracy` for several reasons:
   This is typically done using a process called maximum likelihood estimation. The coefficients are adjusted to maximize the likelihood of the observed data given the model.
   
   
-Creating lists to store model performance on train and validations data sets.
+Creating lists to store model performances on train and validations data sets.
 
 ```{r}
 models_performace_train = list()
@@ -386,6 +388,8 @@ Obtain `log loss` for train data set for logistic regression model #1.
 
 ```{r}
 logistic_regression_train[['logistic_regression_model_1']] = lr_model_1$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #1 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_1']]))
 ```
 
 
@@ -418,6 +422,8 @@ Obtain `log loss` for train data set for logistic regression model #2.
 
 ```{r}
 logistic_regression_train[['logistic_regression_model_2']] = lr_model_2$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #2 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_2']]))
 ```
 
 
@@ -450,8 +456,12 @@ Obtain `log loss` for train data set for logistic regression model #3.
 
 ```{r}
 logistic_regression_train[['logistic_regression_model_3']] = lr_model_3$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #3 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_3']]))
 ```
 
+
+### The best performed logistic regression model
 
 Now we can choose the best performed model based on train dataset performance among logistic regression models.
 
@@ -610,6 +620,8 @@ Here is a break down of the tree structure:
   - **Internal Nodes** - A non-leaf node denoting a test on an attribute.
   - **Leaf Nodes** - The terminal node displaying the classification.
 
+### Fit and validate classification tree model
+
 ```{r}
 train_control <- trainControl(method = "cv",
                               summaryFunction=mnLogLoss,
@@ -676,6 +688,8 @@ There are several hyperparameters which could be fine-tuned during random forest
   - **ntree** - The number of decision trees (or "trees") to be grown in the forest. Increasing the number of trees can improve the model's accuracy, but it also increases computational cost.
 
   
+### Fit and validate random forest model
+  
 ```{r}
 train_control <- trainControl(
   method = "cv",   
@@ -711,7 +725,7 @@ plot(rf_model)
 
 
 
-Calculate log loss for train data set
+Obtain log loss for train data set
 
 
 ```{r}
@@ -749,6 +763,8 @@ Main components of SVM:
   - **Kernel Trick** - SVM can handle both linearly separable and non-linearly separable data. The kernel trick allows SVM to transform data into higher-dimensional space, making it possible to find linear separation in this transformed space. Common kernel functions include linear, polynomial, radial basis function (RBF), and sigmoid.
   - **C Parameter** - SVM has a hyper parameter called C, which controls the trade-off between maximizing the margin and minimizing the classification error. Smaller C values lead to a larger margin but may allow some mis-classification, while larger C values lead to a smaller margin with fewer mis-classifications.
   
+  
+### Fit and validate support vector machine model  
   
 ```{r, warning=FALSE}
 train_control = trainControl(
@@ -828,6 +844,8 @@ Where:
   - $P(x)$ is the prior probability of the predictor.
 
 
+### Fit and validate Naive Bayes model
+
 ```{r}
 train_control = trainControl(
   method = "cv",
@@ -898,14 +916,12 @@ models_performace_val
 ```
 
 The best performed model based on train data set is  **`r names(models_performace_train)[which.min(unlist(models_performace_train))]`**.
-```{r}
-#print (names(models_performace_train)[which.min(unlist(models_performace_train))])
-```
+
 
 The best performed model based on validation data set is **`r names(models_performace_val)[which.min(unlist(models_performace_val))]`**.
-```{r}
-#print (names(models_performace_val)[which.min(unlist(models_performace_val))])
-```
+
 
 
 # Summary
+
+In this report we analyze subset of dataset [Diabetes health indicator dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/) for educational level - **`r names(unlist(education_levels))[unlist(education_levels) == params$education_level]`**. We fit and validate six different machine learning models. Based on performance on validation dataset the best model is **`r names(models_performace_val)[which.min(unlist(models_performace_val))]`**.

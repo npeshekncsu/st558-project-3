@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-07
+2023-11-09
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -22,6 +22,9 @@ Jacob Press, Nataliya Peshekhodko
     - <a href="#523-fit-logistic-regression-model-3"
       id="toc-523-fit-logistic-regression-model-3">5.2.3 Fit Logistic
       regression model 3</a>
+    - <a href="#524-the-best-performed-logistic-regression-model"
+      id="toc-524-the-best-performed-logistic-regression-model">5.2.4 The best
+      performed logistic regression model</a>
   - <a href="#53-lasso-logistic-regression"
     id="toc-53-lasso-logistic-regression">5.3 LASSO logistic regression</a>
     - <a href="#531-fit-and-validate-lasso-logistic-regression"
@@ -29,13 +32,25 @@ Jacob Press, Nataliya Peshekhodko
       validate LASSO logistic regression</a>
   - <a href="#54-classification-tree-model"
     id="toc-54-classification-tree-model">5.4 Classification tree model</a>
+    - <a href="#541-fit-and-validate-classification-tree-model"
+      id="toc-541-fit-and-validate-classification-tree-model">5.4.1 Fit and
+      validate classification tree model</a>
   - <a href="#55-random-forest-model" id="toc-55-random-forest-model">5.5
     Random forest model</a>
+    - <a href="#551-fit-and-validate-random-forest-model"
+      id="toc-551-fit-and-validate-random-forest-model">5.5.1 Fit and validate
+      random forest model</a>
   - <a href="#56-new-model---support-vector-machine"
     id="toc-56-new-model---support-vector-machine">5.6 New model - Support
     Vector Machine</a>
+    - <a href="#561-fit-and-validate-support-vector-machine-model"
+      id="toc-561-fit-and-validate-support-vector-machine-model">5.6.1 Fit and
+      validate support vector machine model</a>
   - <a href="#57-new-model---naive-bayes"
     id="toc-57-new-model---naive-bayes">5.7 New model - Naive Bayes</a>
+    - <a href="#571-fit-and-validate-naive-bayes-model"
+      id="toc-571-fit-and-validate-naive-bayes-model">5.7.1 Fit and validate
+      Naive Bayes model</a>
 - <a href="#6-summary" id="toc-6-summary">6 Summary</a>
 
 # 1 Introduction
@@ -74,7 +89,6 @@ library(tidyverse)
 library(caret)
 library(ggplot2)
 library(corrplot)
-library(klaR)
 ```
 
 - `tidyverse` - is a collection of R packages, required for data
@@ -109,16 +123,15 @@ head(data)
 ```
 
     ## # A tibble: 6 × 22
-    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies
-    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>
-    ## 1               0      1        1         1    40      1      0                    0            0      0       1
-    ## 2               0      0        0         0    25      1      0                    0            1      0       0
-    ## 3               0      1        1         1    28      0      0                    0            0      1       0
-    ## 4               0      1        0         1    27      0      0                    0            1      1       1
-    ## 5               0      1        1         1    24      0      0                    0            1      1       1
-    ## 6               0      1        1         1    25      1      0                    0            1      1       1
-    ## # ℹ 11 more variables: HvyAlcoholConsump <dbl>, AnyHealthcare <dbl>, NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>,
-    ## #   PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>, Age <dbl>, Education <dbl>, Income <dbl>
+    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump AnyHealthcare NoDocbcCost GenHlth MentHlth PhysHlth DiffWalk   Sex   Age
+    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>         <dbl>       <dbl>   <dbl>    <dbl>    <dbl>    <dbl> <dbl> <dbl>
+    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0             1           0       5       18       15        1     0     9
+    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0             0           1       3        0        0        0     0     7
+    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0             1           1       5       30       30        1     0     9
+    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0             1           0       2        0        0        0     0    11
+    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0             1           0       2        3        0        0     0    11
+    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0             1           0       2        0        2        0     1    10
+    ## # ℹ 2 more variables: Education <dbl>, Income <dbl>
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -209,7 +222,7 @@ Variables in the data set:
 
 # 4 Explanatory Data Analysis(EDA)
 
-First, let’s look at number of thr records with Diabetes and without
+First, let’s look at number of the records with Diabetes and without
 Diabetes for the selected education level:
 
 ``` r
@@ -220,7 +233,8 @@ table (factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")) )
     ## No diabet    Diabet 
     ##     51684     11066
 
-Let’s look at `Age` distribution for the selected education level:
+Let’s look at `Age` distribution for the selected education level and
+check if all age groups are presented equally in the subset of data.
 
 ``` r
 ggplot(data = subset, aes(x = Age)) +
@@ -233,7 +247,7 @@ ggplot(data = subset, aes(x = Age)) +
 ![](Education_level_4_report_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 Let’s look at number of cases with Diabetes and without Diabetes for
-each age group for the selected education level
+each age group for the selected education level.
 
 ``` r
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
@@ -246,16 +260,12 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 ```
 
     ##            
-    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59
-    ##   No diabet        1656         1308         1932         2283         2639         3738         5575         6864
-    ##   Diabet             33           36           86          175          278          562          985         1407
-    ##            
-    ##             Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
-    ##   No diabet         6414         5774         4958         3876            4667
-    ##   Diabet            1702         1886         1613         1175            1128
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
+    ##   No diabet        1656         1308         1932         2283         2639         3738         5575         6864         6414         5774         4958         3876            4667
+    ##   Diabet             33           36           86          175          278          562          985         1407         1702         1886         1613         1175            1128
 
-Number of cases with Diabetes and without Diabetes for males and
-females.
+Let’s check if number of cases with Diabetes and without Diabetes are
+equal for males and females for the selected subset of data.
 
 ``` r
 table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
@@ -267,7 +277,9 @@ table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
     ##   No diabet  29014 22670
     ##   Diabet      6106  4960
 
-Linear correlation between numeric variables.
+Linear correlation between numeric variables allows to check which
+variables are correlated with target variable `Diabetes_binary` and
+could be used as predictors in the models.
 
 ``` r
 corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))), 
@@ -282,7 +294,8 @@ health level.
 
 ``` r
 table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")), 
-      factor(subset$GenHlth, labels = c("Excellent", "Very good", "Good", "Fair", "Poor")) )
+      factor(subset$GenHlth, labels = c("Excellent", "Very good", 
+                                        "Good", "Fair", "Poor")) )
 ```
 
     ##            
@@ -334,6 +347,9 @@ ggplot(subset, aes(x = as_factor(Diabetes_binary),
 
 ![](Education_level_4_report_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
+Let’s plot number of cases with Diabetes and Without Diabetes for each
+General Health level for the selected sunset of data.
+
 ``` r
 ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
   geom_bar(position = "dodge") +
@@ -351,9 +367,69 @@ ggplot(subset, aes(x = as.factor(GenHlth), fill = as.factor(Diabetes_binary), gr
 
 ![](Education_level_4_report_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
+Visualization of the proportion with and without diabetes grouped by Age
+for the given education level. It appears the proportion of with
+diabetes increases with age, which is not surprising.
+
+``` r
+ggplot(subset, aes(x = as.factor(Age), y = 1, fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "fill", stat = "identity") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by Age",
+    x = "Age",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) +
+  labs(fill = "Diabetes Status")
+```
+
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+Visualization showing the distribution of `Diabetes_binary` by `BMI`.
+
+``` r
+#TODO: fix this graph. Temporary commented it becasue it causes compilation error. BMI is numeric
+#ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary,fill = Diabetes_binary)) + 
+#  labs(
+#    title = "Violin Plot of Diabetes Status by BMI",
+#    x = "Diabetes Status",
+#    y = "BMI Scale"
+#  ) +
+#  geom_violin(trim = FALSE) + 
+#  scale_fill_manual(
+#    values = c("0" = "grey", "1" = "red"),
+#    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+#    ) + 
+#  labs(fill = "Diabetes Status")
+```
+
+Visualization showing the counts of `Diabetes_binary` by `Income` for
+the given education level.
+
+``` r
+ggplot(subset, aes(x = as.factor(Income), fill = as.factor(Diabetes_binary), group = Diabetes_binary)) +
+  geom_bar(position = "stack") +
+  labs(
+    title = "Number of Cases with Diabetes and Without Diabetes by Income",
+    x = "Income",
+    y = "Number of Cases"
+  ) +
+  scale_fill_manual(
+    values = c("0" = "grey", "1" = "red"),
+    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+  ) +
+  labs(fill = "Diabetes Status")
+```
+
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
 # 5 Modeling
 
-Converting some of the variables to factors.
+Converting some of the variables to factors and checking dataset
+structure.
 
 ``` r
 names = c('HighBP' ,'HighChol', 
@@ -393,7 +469,7 @@ str(subset)
     ##  $ Education           : num [1:62750] 4 4 4 4 4 4 4 4 4 4 ...
     ##  $ Income              : Factor w/ 8 levels "1","2","3","4",..: 3 8 4 3 6 3 4 6 7 8 ...
 
-Spiting up data training and validation data sets.
+Splitting up data into training and validation datasets.
 
 ``` r
 set.seed(5)
@@ -420,23 +496,35 @@ It measures the performance of a model by quantifying the difference
 between predicted probabilities and actual values. Log-loss is
 indicative of how close the prediction probability is to the
 corresponding actual/true value, penalizing inaccurate predictions with
-higher values. Lower log-loss indicates better model performance.
+higher values. **Lower log-loss** indicates **better** model
+performance.
 
 Mathematical interpretation: Log Loss is the negative average of the log
 of corrected predicted probabilities for each instance.
 
 $$log \ loss = -\frac{1}{N} \sum_{i=1}^N y_i log(p(y_i)) + (1-y_i)log(1-p(y_i))$$
 
-$p(y_i)$ is the probability of $1$.
+$p(y_i)$ is the probability of $1$
 
-$1-p(y_i)$ is the probability of 0.
+$1-p(y_i)$ is the probability of 0
+
+$y_i$ is the true binary outcome
+
+We may prefer `log loss` to things like `accuracy` for several reasons:
+
+- **Probabilistic Evaluation** - Log loss considers probabilities, while
+  accuracy only looks at final decisions
+- **Handles Imbalanced Data** - Log loss shows poor performance in
+  imbalanced datasets
+- **Fair Model Comparison** - Log loss enables fair model comparisons
+  and makes it easier to evaluate which model is performing better
 
 ## 5.2 Logistic regression
 
-Logistic regression is a statistical and machine learning model used for
-binary classification tasks. It’s a type of regression analysis that’s
-well-suited for predicting the probability of an observation belonging
-to one of two classes or categories.
+**Logistic regression** is a statistical and machine learning model used
+for binary classification tasks. It’s a type of regression analysis
+that’s well-suited for predicting the probability of an observation
+belonging to one of two classes or categories.
 
 - Logistic regression is used when the response variable is binary,
   meaning it has two possible outcomes or classes.
@@ -452,15 +540,20 @@ to one of two classes or categories.
   coefficients are adjusted to maximize the likelihood of the observed
   data given the model.
 
-Creating lists to store model performance on train and validations data
+Creating lists to store model performances on train and validations data
 sets.
 
 ``` r
 models_performace_train = list()
 models_performace_val = list()
+logistic_regression_train = list()
 ```
 
 ### 5.2.1 Fit Logistic regression model 1
+
+Before we can fit logistic regression models, we need to transform
+response variable to the format `train` function expects using function
+`make.names`.
 
 ``` r
 train_data$Diabetes_binary_transformed = train_data$Diabetes_binary
@@ -469,6 +562,9 @@ val_data$Diabetes_binary_transformed = val_data$Diabetes_binary
 levels(train_data$Diabetes_binary_transformed) = make.names(levels(train_data$Diabetes_binary_transformed))
 levels(val_data$Diabetes_binary_transformed) = make.names(levels(val_data$Diabetes_binary_transformed))
 ```
+
+Fit logistic regression model with `HighChol`, `BMI` and `GenHlth` as
+predictors.
 
 ``` r
 train.control = trainControl(method = "cv", 
@@ -514,60 +610,21 @@ summary(lr_model_1)
     ## 
     ## Number of Fisher Scoring iterations: 6
 
-Create custom function for log loss calculation.
+Obtain `log loss` for train data set for logistic regression model \#1.
 
 ``` r
-calculateLogLoss <- function(predicted_probabilities, true_labels) {
-  predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
-                                 1e-15)
-
-  log_loss <- -mean(true_labels * log(predicted_probabilities) + 
-                      (1 - true_labels) * log(1 - predicted_probabilities))
-  return(log_loss)
-}
+logistic_regression_train[['logistic_regression_model_1']] = lr_model_1$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #1 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_1']]))
 ```
 
-Calculate log loss for train data set for logistic regression model \#1.
-
-``` r
-train_predictions = predict(lr_model_1, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_1))
-```
-
-    ## [1] "Log Loss: 1.90403949092347"
-
-``` r
-models_performace_train[["logistic_regression_model_1"]] <- log_loss_train_lr_model_1
-```
-
-Calculate log loss for validation data set
-
-``` r
-val_predictions = predict(lr_model_1, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
-
-log_loss_val_lr_model_1 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_1))
-```
-
-    ## [1] "Log Loss: 2.02172906448213"
-
-``` r
-models_performace_val[["logistic_regression_model_1"]] = log_loss_val_lr_model_1
-```
+    ## [1] "Obtained Log loss for for logistic regression model #1 on train dataset 0.449723787006158"
 
 ### 5.2.2 Fit Logistic regression model 2
+
+Fit logistic regression with second order `BMI`, `HighChol`,
+`HeartDiseaseorAttack` and interaction between `HighChol`and
+`HeartDiseaseorAttack` as predictors.
 
 ``` r
 train.control = trainControl(method = "cv", 
@@ -612,47 +669,20 @@ summary(lr_model_2)
     ## 
     ## Number of Fisher Scoring iterations: 6
 
-Calculate log loss for train data set
+Obtain `log loss` for train data set for logistic regression model \#2.
 
 ``` r
-train_predictions = predict(lr_model_2, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_2))
+logistic_regression_train[['logistic_regression_model_2']] = lr_model_2$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #2 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_2']]))
 ```
 
-    ## [1] "Log Loss: 1.83265417544303"
-
-``` r
-models_performace_train[["logistic_regression_model_2"]] = log_loss_train_lr_model_2
-```
-
-Calculate log loss for validation data set
-
-``` r
-val_predictions = predict(lr_model_2, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
-
-log_loss_val_lr_model_2 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_2))
-```
-
-    ## [1] "Log Loss: 1.85571979372687"
-
-``` r
-models_performace_val[["logistic_regression_model_2"]] = log_loss_val_lr_model_2
-```
+    ## [1] "Obtained Log loss for for logistic regression model #2 on train dataset 0.41878581810596"
 
 ### 5.2.3 Fit Logistic regression model 3
+
+Fit logistic regression with `Age`, `GenHlth`, `HighBP`,
+`HeartDiseaseorAttack` and second order `BMI` as predictors.
 
 ``` r
 train.control = trainControl(method = "cv", 
@@ -672,11 +702,6 @@ lr_model_3 = train(Diabetes_binary_transformed ~ Income+
                    metric="logLoss",
                    trControl = train.control
                    )
-```
-
-    ## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-``` r
 summary(lr_model_3)
 ```
 
@@ -725,44 +750,81 @@ summary(lr_model_3)
     ## 
     ## Number of Fisher Scoring iterations: 17
 
-Calculate log loss for train data set
+Obtain `log loss` for train data set for logistic regression model \#3.
 
 ``` r
-train_predictions = predict(lr_model_3, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lr_model_3))
+logistic_regression_train[['logistic_regression_model_3']] = lr_model_3$results$logLoss
+print(paste("Obtained Log loss for for logistic regression model #3 on train dataset", 
+            logistic_regression_train[['logistic_regression_model_3']]))
 ```
 
-    ## [1] "Log Loss: 3.8510722140911"
+    ## [1] "Obtained Log loss for for logistic regression model #3 on train dataset 0.457116957539331"
+
+### 5.2.4 The best performed logistic regression model
+
+Now we can choose the best performed model based on train dataset
+performance among logistic regression models.
 
 ``` r
-models_performace_train[["logistic_regression_model_3"]] = log_loss_train_lr_model_3
+best_lr_model = names(logistic_regression_train)[which.min(unlist(logistic_regression_train))]
 ```
 
-Calculate log loss for validation data set
+The best performed logistic regression model is model
+**logistic_regression_model_2**.
+
+Save the logistic regression model performance on training dataset.
 
 ``` r
-val_predictions = predict(lr_model_3, 
+if (best_lr_model == "logistic_regression_model_1") {
+  lr_model = lr_model_1
+} else if (best_lr_model == "logistic_regression_model_2") {
+  lr_model = lr_model_2
+} else {
+  lr_model = lr_model_3
+}
+
+models_performace_train[['logistic_regression_model']] = lr_model$results$logLoss
+
+print(paste("Log Loss for logistic regression model for training dataset:", 
+            models_performace_train[['logistic_regression_model']]))
+```
+
+    ## [1] "Log Loss for logistic regression model for training dataset: 0.41878581810596"
+
+In order to obtain `log loss` metric for validation dataset, let’s
+create custom function for log loss calculation.
+
+``` r
+calculateLogLoss <- function(predicted_probabilities, true_labels) {
+  predicted_probabilities = pmax(pmin(predicted_probabilities, 1 - 1e-15), 
+                                 1e-15)
+
+  log_loss <- -mean(true_labels * log(predicted_probabilities) + 
+                      (1 - true_labels) * log(1 - predicted_probabilities))
+  return(log_loss)
+}
+```
+
+Calculate and save logistic regression model performance on validation
+dataset.
+
+``` r
+val_predictions = predict(lr_model, 
                              newdata = val_data %>% dplyr::select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
-log_loss_val_lr_model_3 = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lr_model_3))
+log_loss_val_lr_model = calculateLogLoss(predicted_prob_class1, true_labels)
+print(paste("Log Loss for logistic regression model for validation dataset:", 
+            log_loss_val_lr_model))
 ```
 
-    ## [1] "Log Loss: 3.85031982936811"
+    ## [1] "Log Loss for logistic regression model for validation dataset: 1.85571979372687"
 
 ``` r
-models_performace_val[["logistic_regression_model_3"]] = log_loss_val_lr_model_3
+models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
 ```
 
 ## 5.3 LASSO logistic regression
@@ -770,11 +832,10 @@ models_performace_val[["logistic_regression_model_3"]] = log_loss_val_lr_model_3
 `LASSO (Least Absolute Shrinkage and Selection Operator) logistic regression`
 is a statistical method that combines logistic regression with LASSO
 regularization. It is used for binary classification problems where you
-want to predict the probability of an event occurring, such as whether a
-customer will buy a product (yes/no) based on various predictor
-variables.
+want to predict the probability of an event occurring based on various
+predictor variables.
 
-How it works:
+$$\sum_{i=1}^n(y_i-\sum_{j}x_{ij}\beta_j)^2 + \lambda \sum_{j=1}^p |\beta_j|$$
 
 - `LASSO logistic regression` models the probability of an event using
   the logistic function. It models the log-odds of the event as a linear
@@ -783,7 +844,7 @@ How it works:
 - `LASSO` adds a regularization term to the logistic regression model.
   The regularization term is a penalty based on the absolute values of
   the model coefficients (L1 regularization). This penalty encourages
-  some of the coefficient values to become exactly zero, effectively
+  some of the coefficient values to become **exactly zero**, effectively
   performing feature selection.
 - `LASSO` regularization promotes sparsity in the model. It can
   automatically select a subset of the most relevant predictor variables
@@ -792,10 +853,15 @@ How it works:
 - The degree of regularization is controlled by a hyper parameter
   denoted as $\lambda$.
 
+Using Lasso models in logistic regression offers benefits such as
+automatic feature selection, better generalization to new data, model
+stability, improved interpretability, handling multicollinearity, and
+variable importance assessment.
+
 ### 5.3.1 Fit and validate LASSO logistic regression
 
 ``` r
-train.control <- trainControl(method = "cv",
+train.control = trainControl(method = "cv",
                               number = 5, 
                               summaryFunction=mnLogLoss,
                               classProbs = TRUE)
@@ -812,12 +878,6 @@ lasso_log_reg<-train(#Diabetes_binary ~.,
                    tuneGrid = expand.grid(alpha = 1, 
                                           lambda=seq(0, 1, by = 0.25))
 )
-```
-
-    ## Warning in train.default(x, y, weights = w, ...): The metric "logLoss" was not in the result set. Accuracy will be used
-    ## instead.
-
-``` r
 lasso_log_reg$results
 ```
 
@@ -842,7 +902,7 @@ Plot obtained accuracy for different $\lambda$ values.
 plot(lasso_log_reg)
 ```
 
-![](Education_level_4_report_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 Calculate log loss for train data set
 
@@ -855,10 +915,11 @@ predicted_prob_class1 = train_predictions[, 1]
 true_labels = as.integer(as.character(train_data$Diabetes_binary))
 
 log_loss_train_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_lasso))
+print(paste("Log Loss for lasso regression model for train dataset", 
+            log_loss_train_lasso))
 ```
 
-    ## [1] "Log Loss: 1.47768811123829"
+    ## [1] "Log Loss for lasso regression model for train dataset 1.47768811123829"
 
 ``` r
 models_performace_train[["lasso"]] = log_loss_train_lasso
@@ -875,10 +936,11 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_lasso = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_lasso))
+print(paste("Log Loss for lasso regression model for validation dataset", 
+            log_loss_val_lasso))
 ```
 
-    ## [1] "Log Loss: 1.53843215073624"
+    ## [1] "Log Loss for lasso regression model for validation dataset 1.53843215073624"
 
 ``` r
 models_performace_val[["lasso"]] = log_loss_val_lasso
@@ -899,6 +961,8 @@ Here is a break down of the tree structure:
 - **Branches** - The arrows connecting the nodes.
 - **Internal Nodes** - A non-leaf node denoting a test on an attribute.
 - **Leaf Nodes** - The terminal node displaying the classification.
+
+### 5.4.1 Fit and validate classification tree model
 
 ``` r
 train_control <- trainControl(method = "cv",
@@ -946,42 +1010,34 @@ tree_model$results
 plot(tree_model)
 ```
 
-![](Education_level_4_report_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
-Calculate log loss for train data set
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+
+Obtain log loss for train data set
 
 ``` r
-train_predictions = predict(tree_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_tree = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_tree))
+models_performace_train[["classification_tree"]] = min(tree_model$results$logLoss)
+print(paste("Log Loss for classification tree model for training dataset:", 
+            models_performace_train[["classification_tree"]]))
 ```
 
-    ## [1] "Log Loss: 1.819882683826"
-
-``` r
-models_performace_train[["classification_tree"]] = log_loss_train_tree
-```
+    ## [1] "Log Loss for classification tree model for training dataset: 0.435338994660815"
 
 Calculate log loss for validation data set
 
 ``` r
 val_predictions = predict(tree_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_tree = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_tree))
+print(paste("Log Loss for classification tree for validation dataset", 
+            log_loss_val_tree))
 ```
 
-    ## [1] "Log Loss: 1.80267859250244"
+    ## [1] "Log Loss for classification tree for validation dataset 1.80267859250244"
 
 ``` r
 models_performace_val[["classification_tree"]] = log_loss_val_tree
@@ -994,7 +1050,7 @@ model used for classification tasks. It is an ensemble of multiple
 decision trees, where each tree predicts the class label of an input
 based on a set of features. The final prediction in a Random Forest is
 determined through a combination of predictions from individual decision
-trees, often using majority voting for classification tasks.
+trees, often using **majority voting** for classification tasks.
 
 Random Forest might be chosen over a basic Classification Tree for
 several reasons:
@@ -1017,6 +1073,20 @@ several reasons:
   making predictions. This feature selection is especially valuable when
   dealing with high-dimensional data.
 
+There are several hyperparameters which could be fine-tuned during
+random forest model training. Some which have the biggest affect to
+model performance:
+
+- **mtry** - Number of predictor variable randomly selected to be
+  sampled at each split of the tree. It controls the level of feature
+  randomness in each tree. A smaller mtry may reduce overfitting, while
+  a larger mtry can lead to better diversity among trees.
+- **ntree** - The number of decision trees (or “trees”) to be grown in
+  the forest. Increasing the number of trees can improve the model’s
+  accuracy, but it also increases computational cost.
+
+### 5.5.1 Fit and validate random forest model
+
 ``` r
 train_control <- trainControl(
   method = "cv",   
@@ -1033,47 +1103,39 @@ rf_model = train(
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth+
-                                HeartDiseaseorAttack,
+                                HeartDiseaseorAttack+
+                                Age+
+                                Income,
   data = dplyr::select(train_data, -Diabetes_binary),
   method = "rf",
   metric="logLoss",
-  tuneGrid = data.frame(mtry = c(1:3)), 
+  tuneGrid = data.frame(mtry = c(1:4)), 
   trControl = train_control
 )
 
 rf_model$results
 ```
 
-    ##   mtry  logLoss logLossSD
-    ## 1    1 2.210461 0.9236610
-    ## 2    2 1.333201 0.6082345
-    ## 3    3 1.048240 0.5897334
+    ##   mtry   logLoss  logLossSD
+    ## 1    1 0.9725341 0.37742775
+    ## 2    2 0.5578986 0.16232838
+    ## 3    3 0.4631675 0.05186905
+    ## 4    4 0.5654993 0.30517247
 
 ``` r
 plot(rf_model)
 ```
 
-![](Education_level_4_report_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
-Calculate log loss for train data set
-
-``` r
-train_predictions = predict(rf_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_rf = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_rf))
-```
-
-    ## [1] "Log Loss: 11.3170368205928"
+Obtain log loss for train data set
 
 ``` r
-models_performace_train[["random_forest"]] = log_loss_train_rf
+models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
+print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
 ```
+
+    ## [1] "Log Loss for random forest model for training dataset: 0.463167535947609"
 
 Calculate log loss for validation data set
 
@@ -1089,11 +1151,14 @@ log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_rf))
 ```
 
-    ## [1] "Log Loss: 10.7187615580179"
+    ## [1] "Log Loss: 3.40651496935857"
 
 ``` r
 models_performace_val[["random_forest"]] = log_loss_val_rf
+log_loss_val_rf
 ```
+
+    ## [1] 3.406515
 
 ## 5.6 New model - Support Vector Machine
 
@@ -1130,6 +1195,8 @@ Main components of SVM:
   allow some mis-classification, while larger C values lead to a smaller
   margin with fewer mis-classifications.
 
+### 5.6.1 Fit and validate support vector machine model
+
 ``` r
 train_control = trainControl(
   method = "cv",
@@ -1158,42 +1225,28 @@ svm_model = train(
 )
 ```
 
-    ## maximum number of iterations reached 0.0002303067 0.0002299297maximum number of iterations reached -6.28761e-05 -6.295164e-05maximum number of iterations reached 0.0002023485 0.0002020819maximum number of iterations reached 1.880718e-05 1.879652e-05maximum number of iterations reached 0.001540278 0.001531012maximum number of iterations reached -7.254561e-05 -7.259901e-05
+    ## maximum number of iterations reached 0.001380852 0.001361526maximum number of iterations reached 0.0003606113 0.0003583553maximum number of iterations reached -1.813607e-05 -1.814389e-05maximum number of iterations reached -3.430225e-05 -3.430444e-05maximum number of iterations reached 0.0006259579 0.000625008maximum number of iterations reached 0.0003915902 0.0003884138
 
 ``` r
-svm_model
+svm_model$results
 ```
 
-    ## Support Vector Machines with Radial Basis Function Kernel 
-    ## 
-    ## 500 samples
-    ##   3 predictor
-    ##   2 classes: 'X0', 'X1' 
-    ## 
-    ## No pre-processing
-    ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 399, 400, 400, 401, 400 
-    ## Resampling results across tuning parameters:
-    ## 
-    ##   sigma  C     logLoss  
-    ##   0.01    0.1  0.4619356
-    ##   0.01    1.0  0.4606605
-    ##   0.01   10.0  0.4618952
-    ##   0.10    0.1  0.4663982
-    ##   0.10    1.0  0.4601909
-    ##   0.10   10.0  0.4580773
-    ##   1.00    0.1  0.4630014
-    ##   1.00    1.0  0.4627010
-    ##   1.00   10.0  0.4643154
-    ## 
-    ## logLoss was used to select the optimal model using the smallest value.
-    ## The final values used for the model were sigma = 0.1 and C = 10.
+    ##   sigma    C   logLoss   logLossSD
+    ## 1  0.01  0.1 0.4629374 0.006879692
+    ## 2  0.01  1.0 0.4648582 0.009574799
+    ## 3  0.01 10.0 0.4632184 0.006917369
+    ## 4  0.10  0.1 0.4631303 0.011232267
+    ## 5  0.10  1.0 0.4659475 0.011274430
+    ## 6  0.10 10.0 0.4607089 0.007966202
+    ## 7  1.00  0.1 0.4625528 0.008059652
+    ## 8  1.00  1.0 0.4633671 0.007274066
+    ## 9  1.00 10.0 0.4656799 0.013200475
 
 ``` r
 plot(svm_model)
 ```
 
-![](Education_level_4_report_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 ``` r
 svm_model$bestTune
@@ -1202,27 +1255,17 @@ svm_model$bestTune
     ##   sigma  C
     ## 6   0.1 10
 
-Calculate log loss for train data set
+Obtain log loss for train dataset.
 
 ``` r
-train_predictions = predict(svm_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_svm))
+models_performace_train[["svm"]] = min(svm_model$results$logLoss)
+print(paste("Log Loss for support vector machine model for training dataset", 
+            models_performace_train[["svm"]]))
 ```
 
-    ## [1] "Log Loss: 1.51714124739354"
+    ## [1] "Log Loss for support vector machine model for training dataset 0.460708864209502"
 
-``` r
-models_performace_train[["svm"]] = log_loss_train_svm
-```
-
-Calculate log loss for validation data set
+Calculate log loss for validation dataset.
 
 ``` r
 val_predictions = predict(svm_model, 
@@ -1233,16 +1276,32 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_svm))
+print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
 ```
 
-    ## [1] "Log Loss: 1.56870453735552"
+    ## [1] "Log Loss for support vector machine model for validation dataset 1.57502686745109"
 
 ``` r
 models_performace_val[["svm"]] = log_loss_val_svm
 ```
 
 ## 5.7 New model - Naive Bayes
+
+The naive Bayes model is a popular supervised machine learning algorithm
+used for classification. An advantage of a naive bayes model is it can
+require a smaller portion of training data to predict classification.
+But naive bayes may be out performed by other models such as boosted
+trees and random forests. A break down of Bayes theorem below:
+
+$$ P(c|x) = \frac{P(x|c)*P(c)}{P(x)}$$ Where:
+
+- $P(c|x)$ is the posterior probability of C (class membership) given x
+  (predictor).
+- $P(c)$ prior probability of class membership.
+- $P(x|c)$ is the probability of the predictor given class membership.
+- $P(x)$ is the prior probability of the predictor.
+
+### 5.7.1 Fit and validate Naive Bayes model
 
 ``` r
 train_control = trainControl(
@@ -1271,67 +1330,33 @@ nb_model$results
 ```
 
     ##   usekernel  fL adjust  logLoss logLossSD
-    ## 1      TRUE 0.0    0.5 3.413633 0.1539140
-    ## 2      TRUE 0.0    1.0 3.416032 0.1870558
-    ## 3      TRUE 0.0    1.5 3.412751 0.1898571
-    ## 4      TRUE 0.5    0.5 3.413633 0.1539140
-    ## 5      TRUE 0.5    1.0 3.416032 0.1870558
-    ## 6      TRUE 0.5    1.5 3.412751 0.1898571
-    ## 7      TRUE 1.0    0.5 3.413633 0.1539140
-    ## 8      TRUE 1.0    1.0 3.416032 0.1870558
-    ## 9      TRUE 1.0    1.5 3.412751 0.1898571
+    ## 1      TRUE 0.0    0.5 3.449753 0.1760866
+    ## 2      TRUE 0.0    1.0 3.414670 0.1796922
+    ## 3      TRUE 0.0    1.5 3.408101 0.1767417
+    ## 4      TRUE 0.5    0.5 3.449753 0.1760866
+    ## 5      TRUE 0.5    1.0 3.414670 0.1796922
+    ## 6      TRUE 0.5    1.5 3.408101 0.1767417
+    ## 7      TRUE 1.0    0.5 3.449753 0.1760866
+    ## 8      TRUE 1.0    1.0 3.414670 0.1796922
+    ## 9      TRUE 1.0    1.5 3.408101 0.1767417
 
 ``` r
-nb_model
+plot(nb_model)
 ```
 
-    ## Naive Bayes 
-    ## 
-    ## 500 samples
-    ##  19 predictor
-    ##   2 classes: 'X0', 'X1' 
-    ## 
-    ## No pre-processing
-    ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 400, 400, 400, 400, 400 
-    ## Resampling results across tuning parameters:
-    ## 
-    ##   fL   adjust  logLoss 
-    ##   0.0  0.5     3.413633
-    ##   0.0  1.0     3.416032
-    ##   0.0  1.5     3.412751
-    ##   0.5  0.5     3.413633
-    ##   0.5  1.0     3.416032
-    ##   0.5  1.5     3.412751
-    ##   1.0  0.5     3.413633
-    ##   1.0  1.0     3.416032
-    ##   1.0  1.5     3.412751
-    ## 
-    ## Tuning parameter 'usekernel' was held constant at a value of TRUE
-    ## logLoss was used to select the optimal model using the smallest value.
-    ## The final values used for the model were fL = 0, usekernel = TRUE and adjust = 1.5.
+![](Education_level_4_report_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
-Calculate log loss for train data set
+Obtain log loss for train dataset.
 
 ``` r
-train_predictions = predict(nb_model, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary_transformed), 
-                             type = "prob")
-
-predicted_prob_class1 = train_predictions[, 1]
-true_labels = as.integer(as.character(train_data$Diabetes_binary))
-
-log_loss_train_nb = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_train_nb))
+models_performace_train[["Naive Bayes"]] = min(nb_model$results$logLoss)
+print(paste("Log Loss for naive bayes model for training dataset", 
+            models_performace_train[["Naive Bayes"]]))
 ```
 
-    ## [1] "Log Loss: 17.3588966356962"
+    ## [1] "Log Loss for naive bayes model for training dataset 3.40810062851827"
 
-``` r
-models_performace_train[["Naive Bayes"]] = log_loss_train_nb
-```
-
-Calculate log loss for validation data set
+Calculate log loss for validation dataset.
 
 ``` r
 val_predictions = predict(nb_model, 
@@ -1342,55 +1367,48 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_nb = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_nb))
+print(paste("Log Loss for naive bayes model for validation dataset", 
+            log_loss_val_nb))
 ```
 
-    ## [1] "Log Loss: 18.0034824665467"
+    ## [1] "Log Loss for naive bayes model for validation dataset 18.0034824665467"
 
 ``` r
 models_performace_val[["Naive Bayes"]] = log_loss_val_nb
 ```
 
+All models performance on training dataset based on `log loss` metric:
+
 ``` r
 models_performace_train
 ```
 
-    ## $logistic_regression_model_1
-    ## [1] 1.904039
-    ## 
-    ## $logistic_regression_model_2
-    ## [1] 1.832654
-    ## 
-    ## $logistic_regression_model_3
-    ## [1] 3.851072
+    ## $logistic_regression_model
+    ## [1] 0.4187858
     ## 
     ## $lasso
     ## [1] 1.477688
     ## 
     ## $classification_tree
-    ## [1] 1.819883
+    ## [1] 0.435339
     ## 
     ## $random_forest
-    ## [1] 11.31704
+    ## [1] 0.4631675
     ## 
     ## $svm
-    ## [1] 1.517141
+    ## [1] 0.4607089
     ## 
     ## $`Naive Bayes`
-    ## [1] 17.3589
+    ## [1] 3.408101
+
+All models performance on validation dataset based on `log loss` metric:
 
 ``` r
 models_performace_val
 ```
 
-    ## $logistic_regression_model_1
-    ## [1] 2.021729
-    ## 
-    ## $logistic_regression_model_2
+    ## $logistic_regression_model
     ## [1] 1.85572
-    ## 
-    ## $logistic_regression_model_3
-    ## [1] 3.85032
     ## 
     ## $lasso
     ## [1] 1.538432
@@ -1399,28 +1417,23 @@ models_performace_val
     ## [1] 1.802679
     ## 
     ## $random_forest
-    ## [1] 10.71876
+    ## [1] 3.406515
     ## 
     ## $svm
-    ## [1] 1.568705
+    ## [1] 1.575027
     ## 
     ## $`Naive Bayes`
     ## [1] 18.00348
 
 The best performed model based on train data set is
+**logistic_regression_model**.
 
-``` r
-print (names(models_performace_train)[which.min(unlist(models_performace_train))])
-```
-
-    ## [1] "lasso"
-
-The best performed model based on validation data set is
-
-``` r
-print (names(models_performace_val)[which.min(unlist(models_performace_val))])
-```
-
-    ## [1] "lasso"
+The best performed model based on validation data set is **lasso**.
 
 # 6 Summary
+
+In this report we analyze subset of dataset [Diabetes health indicator
+dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
+for educational level - **Grade 12 or GED (High school graduate)**. We
+fit and validate six different machine learning models. Based on
+performance on validation dataset the best model is **lasso**.
