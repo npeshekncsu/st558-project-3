@@ -298,8 +298,8 @@ val_data = subset[-trainIndex, ]
 #Will be removed
 #Having performance issues and not able to render for original sizes. 
 #TODO: remove the following lines
-train_data <- train_data[sample(nrow(train_data), size = 500), ]
-val_data <- val_data[sample(nrow(val_data), size = 200), ]
+#train_data <- train_data[sample(nrow(train_data), size = 500), ]
+#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 
@@ -513,6 +513,8 @@ models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
 ## LASSO logistic regression
 
 `LASSO (Least Absolute Shrinkage and Selection Operator) logistic regression` is a statistical method that combines logistic regression with LASSO regularization. It is used for binary classification problems where you want to predict the probability of an event occurring based on various predictor variables.
+
+$$\sum_{i=1}^n(y_i-\sum_{j}x_{ij}\beta_j)^2 + \lambda \sum_{j=1}^p |\beta_j|$$
 
 
   -  `LASSO logistic regression` models the probability of an event using the logistic function. It models the log-odds of the event as a linear combination of predictor variables. The logistic function is used to transform the linear combination into probabilities.
