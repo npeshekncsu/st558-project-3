@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-09
+2023-11-10
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -123,15 +123,16 @@ head(data)
 ```
 
     ## # A tibble: 6 × 22
-    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump AnyHealthcare NoDocbcCost GenHlth MentHlth PhysHlth DiffWalk   Sex   Age
-    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>         <dbl>       <dbl>   <dbl>    <dbl>    <dbl>    <dbl> <dbl> <dbl>
-    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0             1           0       5       18       15        1     0     9
-    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0             0           1       3        0        0        0     0     7
-    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0             1           1       5       30       30        1     0     9
-    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0             1           0       2        0        0        0     0    11
-    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0             1           0       2        3        0        0     0    11
-    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0             1           0       2        0        2        0     1    10
-    ## # ℹ 2 more variables: Education <dbl>, Income <dbl>
+    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump
+    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>
+    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0
+    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0
+    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0
+    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0
+    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0
+    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0
+    ## # ℹ 10 more variables: AnyHealthcare <dbl>, NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>, PhysHlth <dbl>, DiffWalk <dbl>,
+    ## #   Sex <dbl>, Age <dbl>, Education <dbl>, Income <dbl>
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -260,9 +261,13 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 ```
 
     ##            
-    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
-    ##   No diabet        1371         3766         5504         6863         7905         9029        10100        11171        12433        11850         7648         4516            4769
-    ##   Diabet             15           40          103          179          337          486          882         1120         1742         2163         1587          905             841
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64
+    ##   No diabet        1371         3766         5504         6863         7905         9029        10100        11171        12433
+    ##   Diabet             15           40          103          179          337          486          882         1120         1742
+    ##            
+    ##             Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
+    ##   No diabet        11850         7648         4516            4769
+    ##   Diabet            2163         1587          905             841
 
 Let’s check if number of cases with Diabetes and without Diabetes are
 equal for males and females for the selected subset of data.
@@ -391,20 +396,21 @@ ggplot(subset, aes(x = as.factor(Age), y = 1, fill = as.factor(Diabetes_binary),
 Visualization showing the distribution of `Diabetes_binary` by `BMI`.
 
 ``` r
-#TODO: fix this graph. Temporary commented it becasue it causes compilation error. BMI is numeric
-#ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary,fill = Diabetes_binary)) + 
-#  labs(
-#    title = "Violin Plot of Diabetes Status by BMI",
-#    x = "Diabetes Status",
-#    y = "BMI Scale"
-#  ) +
-#  geom_violin(trim = FALSE) + 
-#  scale_fill_manual(
-#    values = c("0" = "grey", "1" = "red"),
-#    labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
-#    ) + 
-#  labs(fill = "Diabetes Status")
+ggplot(subset, aes(x = as.factor(Diabetes_binary), y = BMI, group = Diabetes_binary, fill = as.factor(Diabetes_binary))) +
+ labs(
+   title = "Violin Plot of Diabetes Status by BMI",
+   x = "Diabetes Status",
+   y = "BMI Scale"
+ ) +
+ geom_violin(trim = FALSE) +
+ scale_fill_manual(
+   values = c("0" = "grey", "1" = "red"),
+   labels = c("0" = "Without Diabetes", "1" = "With Diabetes")
+   ) +
+ labs(fill = "Diabetes Status")
 ```
+
+![](Education_level_6_report_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 Visualization showing the counts of `Diabetes_binary` by `Income` for
 the given education level.
@@ -484,8 +490,8 @@ val_data = subset[-trainIndex, ]
 #Will be removed
 #Having performance issues and not able to render for original sizes. 
 #TODO: remove the following lines
-train_data <- train_data[sample(nrow(train_data), size = 500), ]
-val_data <- val_data[sample(nrow(val_data), size = 200), ]
+#train_data <- train_data[sample(nrow(train_data), size = 500), ]
+#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 ## 5.1 Log loss
@@ -591,22 +597,22 @@ summary(lr_model_1)
     ## NULL
     ## 
     ## Coefficients:
-    ##             Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) -5.60840    0.87345  -6.421 1.35e-10 ***
-    ## HighChol1    0.84387    0.33640   2.509  0.01212 *  
-    ## BMI          0.05816    0.02156   2.698  0.00698 ** 
-    ## GenHlth2     1.15894    0.65136   1.779  0.07520 .  
-    ## GenHlth3     1.55112    0.66221   2.342  0.01916 *  
-    ## GenHlth4     1.99984    0.73620   2.716  0.00660 ** 
-    ## GenHlth5     4.32824    0.85571   5.058 4.24e-07 ***
+    ##              Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -5.800363   0.074673  -77.68   <2e-16 ***
+    ## HighChol1    0.931606   0.027334   34.08   <2e-16 ***
+    ## BMI          0.055514   0.001722   32.24   <2e-16 ***
+    ## GenHlth2     1.024228   0.060825   16.84   <2e-16 ***
+    ## GenHlth3     1.950840   0.059608   32.73   <2e-16 ***
+    ## GenHlth4     2.611159   0.064570   40.44   <2e-16 ***
+    ## GenHlth5     3.059123   0.078687   38.88   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ##     Null deviance: 342.31  on 499  degrees of freedom
-    ## Residual deviance: 273.95  on 493  degrees of freedom
-    ## AIC: 287.95
+    ##     Null deviance: 47815  on 75127  degrees of freedom
+    ## Residual deviance: 39920  on 75121  degrees of freedom
+    ## AIC: 39934
     ## 
     ## Number of Fisher Scoring iterations: 6
 
@@ -618,7 +624,7 @@ print(paste("Obtained Log loss for for logistic regression model #1 on train dat
             logistic_regression_train[['logistic_regression_model_1']]))
 ```
 
-    ## [1] "Obtained Log loss for for logistic regression model #1 on train dataset 0.287351902625314"
+    ## [1] "Obtained Log loss for for logistic regression model #1 on train dataset 0.265779618703035"
 
 ### 5.2.2 Fit Logistic regression model 2
 
@@ -651,23 +657,23 @@ summary(lr_model_2)
     ## NULL
     ## 
     ## Coefficients:
-    ##                                   Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)                        -2.9738     0.2691 -11.050  < 2e-16 ***
-    ## `poly(BMI, 2)1`                    13.7735     3.1498   4.373 1.23e-05 ***
-    ## `poly(BMI, 2)2`                    -8.7851     3.4047  -2.580  0.00987 ** 
-    ## HighChol1                           1.0449     0.3344   3.125  0.00178 ** 
-    ## HeartDiseaseorAttack1               2.5628     1.2617   2.031  0.04223 *  
-    ## `HighChol1:HeartDiseaseorAttack1`  -1.6745     1.3484  -1.242  0.21427    
+    ##                                    Estimate Std. Error  z value Pr(>|z|)    
+    ## (Intercept)                        -3.10693    0.02349 -132.284  < 2e-16 ***
+    ## `poly(BMI, 2)1`                   163.07823    3.32843   48.995  < 2e-16 ***
+    ## `poly(BMI, 2)2`                   -96.20752    4.33402  -22.198  < 2e-16 ***
+    ## HighChol1                           1.04706    0.02895   36.172  < 2e-16 ***
+    ## HeartDiseaseorAttack1               1.62634    0.06912   23.530  < 2e-16 ***
+    ## `HighChol1:HeartDiseaseorAttack1`  -0.65086    0.08106   -8.029 9.79e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ##     Null deviance: 342.31  on 499  degrees of freedom
-    ## Residual deviance: 295.73  on 494  degrees of freedom
-    ## AIC: 307.73
+    ##     Null deviance: 47815  on 75127  degrees of freedom
+    ## Residual deviance: 41578  on 75122  degrees of freedom
+    ## AIC: 41590
     ## 
-    ## Number of Fisher Scoring iterations: 5
+    ## Number of Fisher Scoring iterations: 6
 
 Obtain `log loss` for train data set for logistic regression model \#2.
 
@@ -677,7 +683,7 @@ print(paste("Obtained Log loss for for logistic regression model #2 on train dat
             logistic_regression_train[['logistic_regression_model_2']]))
 ```
 
-    ## [1] "Obtained Log loss for for logistic regression model #2 on train dataset 0.391353217953355"
+    ## [1] "Obtained Log loss for for logistic regression model #2 on train dataset 0.276794113326796"
 
 ### 5.2.3 Fit Logistic regression model 3
 
@@ -710,45 +716,45 @@ summary(lr_model_3)
     ## NULL
     ## 
     ## Coefficients:
-    ##                        Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)            -21.2950  2248.0746  -0.009 0.992442    
-    ## Income2                  1.7496     1.9981   0.876 0.381227    
-    ## Income3                  2.8189     1.8736   1.505 0.132447    
-    ## Income4                  0.3206     1.9720   0.163 0.870843    
-    ## Income5                  1.9579     1.7389   1.126 0.260206    
-    ## Income6                  1.2860     1.7253   0.745 0.456045    
-    ## Income7                 -0.2593     1.7525  -0.148 0.882367    
-    ## Income8                  0.5153     1.6905   0.305 0.760499    
-    ## Age2                    16.3725  2248.0743   0.007 0.994189    
-    ## Age3                     0.1336  2517.1653   0.000 0.999958    
-    ## Age4                    15.6336  2248.0743   0.007 0.994451    
-    ## Age5                    16.6378  2248.0741   0.007 0.994095    
-    ## Age6                    16.5031  2248.0741   0.007 0.994143    
-    ## Age7                    16.1055  2248.0741   0.007 0.994284    
-    ## Age8                    17.0206  2248.0740   0.008 0.993959    
-    ## Age9                    16.6316  2248.0740   0.007 0.994097    
-    ## Age10                   16.8262  2248.0740   0.007 0.994028    
-    ## Age11                   16.2771  2248.0741   0.007 0.994223    
-    ## Age12                   16.9826  2248.0741   0.008 0.993973    
-    ## Age13                   17.0258  2248.0741   0.008 0.993957    
-    ## GenHlth2                 0.8315     0.6846   1.215 0.224544    
-    ## GenHlth3                 1.1312     0.6992   1.618 0.105693    
-    ## GenHlth4                 1.2091     0.8170   1.480 0.138897    
-    ## GenHlth5                 3.6031     1.0094   3.570 0.000357 ***
-    ## HighBP1                  1.1316     0.4440   2.549 0.010811 *  
-    ## HeartDiseaseorAttack1    0.3212     0.6477   0.496 0.619984    
-    ## `poly(BMI, 2)1`         11.1216     4.5586   2.440 0.014701 *  
-    ## `poly(BMI, 2)2`         -9.8791     6.8149  -1.450 0.147160    
+    ##                         Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept)           -5.265e+00  2.941e-01 -17.902  < 2e-16 ***
+    ## Income2                4.564e-02  1.315e-01   0.347  0.72854    
+    ## Income3               -9.102e-04  1.230e-01  -0.007  0.99410    
+    ## Income4               -8.991e-02  1.169e-01  -0.769  0.44188    
+    ## Income5               -6.770e-02  1.104e-01  -0.613  0.53967    
+    ## Income6               -1.544e-01  1.067e-01  -1.447  0.14803    
+    ## Income7               -1.697e-01  1.050e-01  -1.616  0.10620    
+    ## Income8               -2.901e-01  1.028e-01  -2.823  0.00475 ** 
+    ## Age2                  -4.758e-01  3.360e-01  -1.416  0.15682    
+    ## Age3                   6.355e-02  2.982e-01   0.213  0.83123    
+    ## Age4                   2.012e-01  2.899e-01   0.694  0.48776    
+    ## Age5                   7.800e-01  2.818e-01   2.768  0.00565 ** 
+    ## Age6                   8.492e-01  2.796e-01   3.037  0.00239 ** 
+    ## Age7                   1.290e+00  2.772e-01   4.654 3.26e-06 ***
+    ## Age8                   1.299e+00  2.766e-01   4.696 2.65e-06 ***
+    ## Age9                   1.584e+00  2.756e-01   5.747 9.10e-09 ***
+    ## Age10                  1.786e+00  2.754e-01   6.485 8.90e-11 ***
+    ## Age11                  1.914e+00  2.761e-01   6.931 4.19e-12 ***
+    ## Age12                  1.879e+00  2.777e-01   6.764 1.35e-11 ***
+    ## Age13                  1.720e+00  2.781e-01   6.185 6.21e-10 ***
+    ## GenHlth2               8.519e-01  6.136e-02  13.885  < 2e-16 ***
+    ## GenHlth3               1.601e+00  6.081e-02  26.322  < 2e-16 ***
+    ## GenHlth4               2.106e+00  6.700e-02  31.429  < 2e-16 ***
+    ## GenHlth5               2.495e+00  8.320e-02  29.982  < 2e-16 ***
+    ## HighBP1                7.999e-01  3.048e-02  26.245  < 2e-16 ***
+    ## HeartDiseaseorAttack1  4.259e-01  3.942e-02  10.806  < 2e-16 ***
+    ## `poly(BMI, 2)1`        1.224e+02  3.693e+00  33.156  < 2e-16 ***
+    ## `poly(BMI, 2)2`       -7.405e+01  4.807e+00 -15.404  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ##     Null deviance: 342.31  on 499  degrees of freedom
-    ## Residual deviance: 231.71  on 472  degrees of freedom
-    ## AIC: 287.71
+    ##     Null deviance: 47815  on 75127  degrees of freedom
+    ## Residual deviance: 37277  on 75100  degrees of freedom
+    ## AIC: 37333
     ## 
-    ## Number of Fisher Scoring iterations: 17
+    ## Number of Fisher Scoring iterations: 7
 
 Obtain `log loss` for train data set for logistic regression model \#3.
 
@@ -758,7 +764,7 @@ print(paste("Obtained Log loss for for logistic regression model #3 on train dat
             logistic_regression_train[['logistic_regression_model_3']]))
 ```
 
-    ## [1] "Obtained Log loss for for logistic regression model #3 on train dataset 0.393419875873982"
+    ## [1] "Obtained Log loss for for logistic regression model #3 on train dataset 0.248587454361548"
 
 ### 5.2.4 The best performed logistic regression model
 
@@ -770,7 +776,7 @@ best_lr_model = names(logistic_regression_train)[which.min(unlist(logistic_regre
 ```
 
 The best performed logistic regression model is model
-**logistic_regression_model_1**.
+**logistic_regression_model_3**.
 
 Save the logistic regression model performance on training dataset.
 
@@ -789,7 +795,7 @@ print(paste("Log Loss for logistic regression model for training dataset:",
             models_performace_train[['logistic_regression_model']]))
 ```
 
-    ## [1] "Log Loss for logistic regression model for training dataset: 0.287351902625314"
+    ## [1] "Log Loss for logistic regression model for training dataset: 0.248587454361548"
 
 In order to obtain `log loss` metric for validation dataset, let’s
 create custom function for log loss calculation.
@@ -821,7 +827,7 @@ print(paste("Log Loss for logistic regression model for validation dataset:",
             log_loss_val_lr_model))
 ```
 
-    ## [1] "Log Loss for logistic regression model for validation dataset: 2.51986363200912"
+    ## [1] "Log Loss for logistic regression model for validation dataset: 2.99131012812533"
 
 ``` r
 models_performace_val[["logistic_regression_model"]] = log_loss_val_lr_model
@@ -881,12 +887,12 @@ lasso_log_reg<-train(#Diabetes_binary ~.,
 lasso_log_reg$results
 ```
 
-    ##   alpha lambda  Accuracy     Kappa AccuracySD    KappaSD
-    ## 1     1   0.00 0.8903850 0.2674226 0.01974241 0.06603234
-    ## 2     1   0.25 0.8866731 0.0000000 0.02085176 0.00000000
-    ## 3     1   0.50 0.8866731 0.0000000 0.02085176 0.00000000
-    ## 4     1   0.75 0.8866731 0.0000000 0.02085176 0.00000000
-    ## 5     1   1.00 0.8866731 0.0000000 0.02085176 0.00000000
+    ##   alpha lambda  Accuracy    Kappa  AccuracySD     KappaSD
+    ## 1     1   0.00 0.9047933 0.135881 0.001594876 0.009385144
+    ## 2     1   0.25 0.9033051 0.000000 0.001725910 0.000000000
+    ## 3     1   0.50 0.9033051 0.000000 0.001725910 0.000000000
+    ## 4     1   0.75 0.9033051 0.000000 0.001725910 0.000000000
+    ## 5     1   1.00 0.9033051 0.000000 0.001725910 0.000000000
 
 Obtained the best tuning parameter $\lambda$ value is
 
@@ -919,7 +925,7 @@ print(paste("Log Loss for lasso regression model for train dataset",
             log_loss_train_lasso))
 ```
 
-    ## [1] "Log Loss for lasso regression model for train dataset 3.08042147012686"
+    ## [1] "Log Loss for lasso regression model for train dataset 2.97348543580628"
 
 ``` r
 models_performace_train[["lasso"]] = log_loss_train_lasso
@@ -940,7 +946,7 @@ print(paste("Log Loss for lasso regression model for validation dataset",
             log_loss_val_lasso))
 ```
 
-    ## [1] "Log Loss for lasso regression model for validation dataset 2.91293064108827"
+    ## [1] "Log Loss for lasso regression model for validation dataset 2.97637118816943"
 
 ``` r
 models_performace_val[["lasso"]] = log_loss_val_lasso
@@ -981,30 +987,30 @@ tree_model <- train(Diabetes_binary_transformed ~ .,
 tree_model$results
 ```
 
-    ##       cp   logLoss  logLossSD
-    ## 1  0.000 0.3245296 0.02322913
-    ## 2  0.001 0.3245296 0.02322913
-    ## 3  0.002 0.3245296 0.02322913
-    ## 4  0.003 0.3245296 0.02322913
-    ## 5  0.004 0.3245296 0.02322913
-    ## 6  0.005 0.3245296 0.02322913
-    ## 7  0.006 0.3245296 0.02322913
-    ## 8  0.007 0.3245296 0.02322913
-    ## 9  0.008 0.3245296 0.02322913
-    ## 10 0.009 0.3245296 0.02322913
-    ## 11 0.010 0.3245296 0.02322913
-    ## 12 0.011 0.3245296 0.02322913
-    ## 13 0.012 0.3374572 0.02462839
-    ## 14 0.013 0.3374572 0.02462839
-    ## 15 0.014 0.3374572 0.02462839
-    ## 16 0.015 0.3374572 0.02462839
-    ## 17 0.016 0.3374572 0.02462839
-    ## 18 0.017 0.3374572 0.02462839
-    ## 19 0.018 0.3374572 0.02462839
-    ## 20 0.019 0.3374572 0.02462839
-    ## 21 0.020 0.3374572 0.02462839
-    ## 22 0.021 0.3374572 0.02462839
-    ## 23 0.022 0.3374572 0.02462839
+    ##       cp   logLoss    logLossSD
+    ## 1  0.000 0.3043922 1.246431e-02
+    ## 2  0.001 0.2806844 3.465780e-03
+    ## 3  0.002 0.2806193 2.384719e-03
+    ## 4  0.003 0.3110174 1.610988e-02
+    ## 5  0.004 0.3182206 7.884718e-06
+    ## 6  0.005 0.3182206 7.884718e-06
+    ## 7  0.006 0.3182206 7.884718e-06
+    ## 8  0.007 0.3182206 7.884718e-06
+    ## 9  0.008 0.3182206 7.884718e-06
+    ## 10 0.009 0.3182206 7.884718e-06
+    ## 11 0.010 0.3182206 7.884718e-06
+    ## 12 0.011 0.3182206 7.884718e-06
+    ## 13 0.012 0.3182206 7.884718e-06
+    ## 14 0.013 0.3182206 7.884718e-06
+    ## 15 0.014 0.3182206 7.884718e-06
+    ## 16 0.015 0.3182206 7.884718e-06
+    ## 17 0.016 0.3182206 7.884718e-06
+    ## 18 0.017 0.3182206 7.884718e-06
+    ## 19 0.018 0.3182206 7.884718e-06
+    ## 20 0.019 0.3182206 7.884718e-06
+    ## 21 0.020 0.3182206 7.884718e-06
+    ## 22 0.021 0.3182206 7.884718e-06
+    ## 23 0.022 0.3182206 7.884718e-06
 
 ``` r
 plot(tree_model)
@@ -1020,7 +1026,7 @@ print(paste("Log Loss for classification tree model for training dataset:",
             models_performace_train[["classification_tree"]]))
 ```
 
-    ## [1] "Log Loss for classification tree model for training dataset: 0.324529577165078"
+    ## [1] "Log Loss for classification tree model for training dataset: 0.280619306677743"
 
 Calculate log loss for validation data set
 
@@ -1037,7 +1043,7 @@ print(paste("Log Loss for classification tree for validation dataset",
             log_loss_val_tree))
 ```
 
-    ## [1] "Log Loss for classification tree for validation dataset 2.17604102388894"
+    ## [1] "Log Loss for classification tree for validation dataset 2.47910604157757"
 
 ``` r
 models_performace_val[["classification_tree"]] = log_loss_val_tree
@@ -1116,11 +1122,11 @@ rf_model = train(
 rf_model$results
 ```
 
-    ##   mtry   logLoss logLossSD
-    ## 1    1 0.9493788 0.2566640
-    ## 2    2 0.5967438 0.2657789
-    ## 3    3 0.4631630 0.1748815
-    ## 4    4 0.4542095 0.2067509
+    ##   mtry  logLoss  logLossSD
+    ## 1    1 2.445045 0.04582437
+    ## 2    2 1.892131 0.03327108
+    ## 3    3 1.585629 0.02329645
+    ## 4    4 1.408963 0.02809243
 
 ``` r
 plot(rf_model)
@@ -1135,7 +1141,7 @@ models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
 print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
 ```
 
-    ## [1] "Log Loss for random forest model for training dataset: 0.454209506270248"
+    ## [1] "Log Loss for random forest model for training dataset: 1.40896337382372"
 
 Calculate log loss for validation data set
 
@@ -1151,14 +1157,14 @@ log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss:", log_loss_val_rf))
 ```
 
-    ## [1] "Log Loss: 8.90060689883952"
+    ## [1] "Log Loss: 25.2917197434347"
 
 ``` r
 models_performace_val[["random_forest"]] = log_loss_val_rf
 log_loss_val_rf
 ```
 
-    ## [1] 8.900607
+    ## [1] 25.29172
 
 ## 5.6 New model - Support Vector Machine
 
@@ -1205,9 +1211,15 @@ train_control = trainControl(
   summaryFunction=mnLogLoss
 )
 
+#svm_grid = expand.grid(
+#  sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
+#  C = c(0.1, 1, 10)          # Range of C values for regularization
+#)
+
+
 svm_grid = expand.grid(
-  sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
-  C = c(0.1, 1, 10)          # Range of C values for regularization
+  sigma = c(0.1),   # Range of sigma values for the RBF kernel
+  C = c(1, 10)          # Range of C values for regularization
 )
 
 # limiting number of features due to performance 
@@ -1223,19 +1235,17 @@ svm_model = train(
   metric="logLoss",
   tuneGrid = svm_grid
 )
+```
+
+    ## line search fails -2.068984 0.2390005 1.937854e-05 6.904634e-06 -1.101632e-07 -1.071605e-07 -2.874707e-12
+
+``` r
 svm_model$results
 ```
 
-    ##   sigma    C   logLoss  logLossSD
-    ## 1  0.01  0.1 0.3119115 0.01937725
-    ## 2  0.01  1.0 0.3090122 0.01946924
-    ## 3  0.01 10.0 0.3033352 0.02228691
-    ## 4  0.10  0.1 0.3052157 0.02042321
-    ## 5  0.10  1.0 0.3021155 0.02591827
-    ## 6  0.10 10.0 0.3059896 0.01801720
-    ## 7  1.00  0.1 0.3034008 0.02136120
-    ## 8  1.00  1.0 0.3022901 0.01838937
-    ## 9  1.00 10.0 0.3223057 0.02496366
+    ##   sigma  C   logLoss    logLossSD
+    ## 1   0.1  1 0.3085985 0.0008603485
+    ## 2   0.1 10 0.3082989 0.0008733599
 
 ``` r
 plot(svm_model)
@@ -1247,8 +1257,8 @@ plot(svm_model)
 svm_model$bestTune
 ```
 
-    ##   sigma C
-    ## 5   0.1 1
+    ##   sigma  C
+    ## 2   0.1 10
 
 Obtain log loss for train dataset.
 
@@ -1258,7 +1268,7 @@ print(paste("Log Loss for support vector machine model for training dataset",
             models_performace_train[["svm"]]))
 ```
 
-    ## [1] "Log Loss for support vector machine model for training dataset 0.302115517552449"
+    ## [1] "Log Loss for support vector machine model for training dataset 0.308298923607785"
 
 Calculate log loss for validation dataset.
 
@@ -1274,7 +1284,7 @@ log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
 ```
 
-    ## [1] "Log Loss for support vector machine model for validation dataset 2.19437275608026"
+    ## [1] "Log Loss for support vector machine model for validation dataset 2.16668213769884"
 
 ``` r
 models_performace_val[["svm"]] = log_loss_val_svm
@@ -1308,7 +1318,7 @@ train_control = trainControl(
 
 nb_grid <- expand.grid(
   usekernel = TRUE,
-  fL = seq(0,1, by = 0.5),
+  fL = 1,
   adjust = seq(0.5, 1.5, by = 0.5)
 )
 
@@ -1324,16 +1334,10 @@ nb_model = train(
 nb_model$results
 ```
 
-    ##   usekernel  fL adjust  logLoss logLossSD
-    ## 1      TRUE 0.0    0.5 2.795858 0.4837298
-    ## 2      TRUE 0.0    1.0 2.780407 0.4647200
-    ## 3      TRUE 0.0    1.5 2.720842 0.3949264
-    ## 4      TRUE 0.5    0.5 2.795858 0.4837298
-    ## 5      TRUE 0.5    1.0 2.780407 0.4647200
-    ## 6      TRUE 0.5    1.5 2.720842 0.3949264
-    ## 7      TRUE 1.0    0.5 2.795858 0.4837298
-    ## 8      TRUE 1.0    1.0 2.780407 0.4647200
-    ## 9      TRUE 1.0    1.5 2.720842 0.3949264
+    ##   usekernel fL adjust  logLoss  logLossSD
+    ## 1      TRUE  1    0.5 1.794661 0.01089894
+    ## 2      TRUE  1    1.0 1.773013 0.01126460
+    ## 3      TRUE  1    1.5 1.773774 0.01116102
 
 ``` r
 plot(nb_model)
@@ -1349,7 +1353,7 @@ print(paste("Log Loss for naive bayes model for training dataset",
             models_performace_train[["Naive Bayes"]]))
 ```
 
-    ## [1] "Log Loss for naive bayes model for training dataset 2.72084218227013"
+    ## [1] "Log Loss for naive bayes model for training dataset 1.77301336748555"
 
 Calculate log loss for validation dataset.
 
@@ -1366,7 +1370,7 @@ print(paste("Log Loss for naive bayes model for validation dataset",
             log_loss_val_nb))
 ```
 
-    ## [1] "Log Loss for naive bayes model for validation dataset 25.2649559461181"
+    ## [1] "Log Loss for naive bayes model for validation dataset 20.0032040616059"
 
 ``` r
 models_performace_val[["Naive Bayes"]] = log_loss_val_nb
@@ -1379,22 +1383,22 @@ models_performace_train
 ```
 
     ## $logistic_regression_model
-    ## [1] 0.2873519
+    ## [1] 0.2485875
     ## 
     ## $lasso
-    ## [1] 3.080421
+    ## [1] 2.973485
     ## 
     ## $classification_tree
-    ## [1] 0.3245296
+    ## [1] 0.2806193
     ## 
     ## $random_forest
-    ## [1] 0.4542095
+    ## [1] 1.408963
     ## 
     ## $svm
-    ## [1] 0.3021155
+    ## [1] 0.3082989
     ## 
     ## $`Naive Bayes`
-    ## [1] 2.720842
+    ## [1] 1.773013
 
 All models performance on validation dataset based on `log loss` metric:
 
@@ -1403,28 +1407,27 @@ models_performace_val
 ```
 
     ## $logistic_regression_model
-    ## [1] 2.519864
+    ## [1] 2.99131
     ## 
     ## $lasso
-    ## [1] 2.912931
+    ## [1] 2.976371
     ## 
     ## $classification_tree
-    ## [1] 2.176041
+    ## [1] 2.479106
     ## 
     ## $random_forest
-    ## [1] 8.900607
+    ## [1] 25.29172
     ## 
     ## $svm
-    ## [1] 2.194373
+    ## [1] 2.166682
     ## 
     ## $`Naive Bayes`
-    ## [1] 25.26496
+    ## [1] 20.0032
 
 The best performed model based on train data set is
 **logistic_regression_model**.
 
-The best performed model based on validation data set is
-**classification_tree**.
+The best performed model based on validation data set is **svm**.
 
 # 6 Summary
 
@@ -1432,5 +1435,4 @@ In this report we analyze subset of dataset [Diabetes health indicator
 dataset](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/)
 for educational level - **College 4 years or more (College graduate)**.
 We fit and validate six different machine learning models. Based on
-performance on validation dataset the best model is
-**classification_tree**.
+performance on validation dataset the best model is **svm**.

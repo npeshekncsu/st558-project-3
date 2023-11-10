@@ -154,7 +154,7 @@ table(factor (subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 Linear correlation between numeric variables allows to check which variables are correlated with target variable `Diabetes_binary` and could be used as predictors in the models.
 
 ```{r}
-corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))), 
+corrplot(cor(as.matrix(subset %>% select(-Education))), 
          type="upper", 
          tl.pos = "lt")
 ```
@@ -299,8 +299,8 @@ val_data = subset[-trainIndex, ]
 #Will be removed
 #Having performance issues and not able to render for original sizes. 
 #TODO: remove the following lines
-train_data <- train_data[sample(nrow(train_data), size = 500), ]
-val_data <- val_data[sample(nrow(val_data), size = 200), ]
+#train_data <- train_data[sample(nrow(train_data), size = 500), ]
+#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 
@@ -505,7 +505,7 @@ Calculate and save logistic regression model performance on validation dataset.
 
 ```{r}
 val_predictions = predict(lr_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -550,7 +550,7 @@ set.seed(2)
 # Limiting number of features due to performance issues
 lasso_log_reg<-train(#Diabetes_binary ~., 
                    Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
-                   data = dplyr::select(train_data, -Diabetes_binary_transformed),
+                   data = select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
                    metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
@@ -577,7 +577,7 @@ Calculate log loss for train data set
 
 ```{r}
 train_predictions = predict(lasso_log_reg, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = train_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -594,7 +594,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(lasso_log_reg, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -628,7 +628,7 @@ train_control <- trainControl(method = "cv",
                               number = 5)
 set.seed(1122)
 tree_model <- train(Diabetes_binary_transformed ~ ., 
-                data = dplyr::select(train_data, -Diabetes_binary), 
+                data = select(train_data, -Diabetes_binary), 
                 method = "rpart",
                 trControl = train_control,
                 metric="logLoss",
@@ -654,7 +654,7 @@ Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(tree_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -708,7 +708,7 @@ rf_model = train(
                                 HeartDiseaseorAttack+
                                 Age+
                                 Income,
-  data = dplyr::select(train_data, -Diabetes_binary),
+  data = select(train_data, -Diabetes_binary),
   method = "rf",
   metric="logLoss",
   tuneGrid = data.frame(mtry = c(1:4)), 
@@ -729,24 +729,25 @@ Obtain log loss for train data set
 
 ```{r}
 models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
-print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
+print(paste("Log Loss for random forest model for training dataset:", 
+            models_performace_train[["random_forest"]]))
 ```
 
 Calculate log loss for validation data set
 
 ```{r}
 val_predictions = predict(rf_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_rf))
+print(paste("Log Loss for random forest model for validation dataset", 
+            log_loss_val_rf))
 
 models_performace_val[["random_forest"]] = log_loss_val_rf
-log_loss_val_rf
 ```
 
 
@@ -773,19 +774,26 @@ train_control = trainControl(
   summaryFunction=mnLogLoss
 )
 
+#svm_grid = expand.grid(
+#  sigma = c(0.01, 0.1, 1), 
+#  C = c(0.1, 1, 10)
+#)
+
+# limiting number of hyperparameters due to the
+# performance issues
 svm_grid = expand.grid(
-  sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
-  C = c(0.1, 1, 10)          # Range of C values for regularization
+  sigma = c(0.1),
+  C = c(1, 10)
 )
 
-# limiting number of features due to performance 
-# issues of the algorithm 
+# limiting number of features due to the performance 
+# issues
 svm_model = train(
   #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth,
-  data = dplyr::select(train_data, -Diabetes_binary),
+  data = select(train_data, -Diabetes_binary),
   method = "svmRadial",
   trControl = train_control,
   metric="logLoss",
@@ -818,14 +826,15 @@ Calculate log loss for validation dataset.
 
 ```{r}
 val_predictions = predict(svm_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
+print(paste("Log Loss for support vector machine model for validation dataset", 
+            log_loss_val_svm))
 
 models_performace_val[["svm"]] = log_loss_val_svm
 ```
@@ -861,7 +870,7 @@ nb_grid <- expand.grid(
 
 nb_model = train(
   Diabetes_binary_transformed ~ ., 
-  data = dplyr::select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
+  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
   method = "nb",
   trControl = train_control,
   tuneGrid = nb_grid,
@@ -890,7 +899,7 @@ Calculate log loss for validation dataset.
 
 ```{r}
 val_predictions = predict(nb_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
