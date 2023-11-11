@@ -539,8 +539,9 @@ train.control = trainControl(method = "cv",
 
 set.seed(2)
 
-# Limiting number of features due to performance issues
-lasso_log_reg<-train(#Diabetes_binary ~., 
+# Limiting number of features due to performance issues.
+# Ideally, we should try to use all available predictors Diabetes_binary ~.
+lasso_log_reg<-train(
                    Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
                    data = select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
