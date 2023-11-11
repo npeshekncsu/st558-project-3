@@ -293,14 +293,6 @@ trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7,
                                   times = 1)
 train_data = subset[trainIndex, ]
 val_data = subset[-trainIndex, ]
-
-
-#Taking sample TEMPORARY. 
-#Will be removed
-#Having performance issues and not able to render for original sizes. 
-#TODO: remove the following lines
-#train_data <- train_data[sample(nrow(train_data), size = 500), ]
-#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 
@@ -697,11 +689,11 @@ train_control <- trainControl(
   classProbs = TRUE
 )
 
-# limiting number of the features due 
-# to performance issues with random forest algorithm
+# Limiting number of the features due 
+# to performance issues with random forest algorithm.
+# Ideally we should try to use all features:  Diabetes_binary_transformed ~ ., 
 set.seed(11)
 rf_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth+
@@ -774,11 +766,6 @@ train_control = trainControl(
   summaryFunction=mnLogLoss
 )
 
-#svm_grid = expand.grid(
-#  sigma = c(0.01, 0.1, 1), 
-#  C = c(0.1, 1, 10)
-#)
-
 # limiting number of hyperparameters due to the
 # performance issues
 svm_grid = expand.grid(
@@ -786,10 +773,9 @@ svm_grid = expand.grid(
   C = c(1, 10)
 )
 
-# limiting number of features due to the performance 
-# issues
+# Limiting number of features due to the performance 
+# issues. Ideally, we should try to use all predictors: Diabetes_binary_transformed ~ .
 svm_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth,
