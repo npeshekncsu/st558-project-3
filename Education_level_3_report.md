@@ -1138,7 +1138,8 @@ Obtain log loss for train data set
 
 ``` r
 models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
-print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
+print(paste("Log Loss for random forest model for training dataset:", 
+            models_performace_train[["random_forest"]]))
 ```
 
     ## [1] "Log Loss for random forest model for training dataset: 0.652798247916833"
@@ -1154,17 +1155,15 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_rf))
+print(paste("Log Loss for random forest model for validation dataset", 
+            log_loss_val_rf))
 ```
 
-    ## [1] "Log Loss: 3.99923235948755"
+    ## [1] "Log Loss for random forest model for validation dataset 3.99923235948755"
 
 ``` r
 models_performace_val[["random_forest"]] = log_loss_val_rf
-log_loss_val_rf
 ```
-
-    ## [1] 3.999232
 
 ## 5.6 New model - Support Vector Machine
 
@@ -1277,7 +1276,8 @@ predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
+print(paste("Log Loss for support vector machine model for validation dataset", 
+            log_loss_val_svm))
 ```
 
     ## [1] "Log Loss for support vector machine model for validation dataset 1.20441907247718"

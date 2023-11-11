@@ -23,7 +23,7 @@ params_list = list("12", "3", "4", "5", "6")
 for (level in params_list) {
   params = list(education_level = level)
   render(
-    input = "Readme.Rmd",
+    input = "Report.Rmd",
     output_file = paste0("Education_level_", level, "_report.md"),
     runtime = "static",
     params = params,

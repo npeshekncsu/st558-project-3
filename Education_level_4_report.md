@@ -123,15 +123,16 @@ head(data)
 ```
 
     ## # A tibble: 6 × 22
-    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump AnyHealthcare NoDocbcCost GenHlth MentHlth PhysHlth DiffWalk   Sex   Age
-    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>         <dbl>       <dbl>   <dbl>    <dbl>    <dbl>    <dbl> <dbl> <dbl>
-    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0             1           0       5       18       15        1     0     9
-    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0             0           1       3        0        0        0     0     7
-    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0             1           1       5       30       30        1     0     9
-    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0             1           0       2        0        0        0     0    11
-    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0             1           0       2        3        0        0     0    11
-    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0             1           0       2        0        2        0     1    10
-    ## # ℹ 2 more variables: Education <dbl>, Income <dbl>
+    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump AnyHealthcare
+    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>         <dbl>
+    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0             1
+    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0             0
+    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0             1
+    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0             1
+    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0             1
+    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0             1
+    ## # ℹ 9 more variables: NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>, PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>, Age <dbl>, Education <dbl>,
+    ## #   Income <dbl>
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -260,9 +261,13 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 ```
 
     ##            
-    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
-    ##   No diabet        1656         1308         1932         2283         2639         3738         5575         6864         6414         5774         4958         3876            4667
-    ##   Diabet             33           36           86          175          278          562          985         1407         1702         1886         1613         1175            1128
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74
+    ##   No diabet        1656         1308         1932         2283         2639         3738         5575         6864         6414         5774         4958
+    ##   Diabet             33           36           86          175          278          562          985         1407         1702         1886         1613
+    ##            
+    ##             Age 75 to 79 Age 80 or older
+    ##   No diabet         3876            4667
+    ##   Diabet            1175            1128
 
 Let’s check if number of cases with Diabetes and without Diabetes are
 equal for males and females for the selected subset of data.
@@ -282,7 +287,7 @@ variables are correlated with target variable `Diabetes_binary` and
 could be used as predictors in the models.
 
 ``` r
-corrplot(cor(as.matrix(subset %>% dplyr::select(-Education))), 
+corrplot(cor(as.matrix(subset %>% select(-Education))), 
          type="upper", 
          tl.pos = "lt")
 ```
@@ -811,7 +816,7 @@ dataset.
 
 ``` r
 val_predictions = predict(lr_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -873,7 +878,7 @@ set.seed(2)
 # Limiting number of features due to performance issues
 lasso_log_reg<-train(#Diabetes_binary ~., 
                    Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
-                   data = dplyr::select(train_data, -Diabetes_binary_transformed),
+                   data = select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
                    metric="logLoss",
                    tuneGrid = expand.grid(alpha = 1, 
@@ -909,7 +914,7 @@ Calculate log loss for train data set
 
 ``` r
 train_predictions = predict(lasso_log_reg, 
-                             newdata = train_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = train_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = train_predictions[, 1]
@@ -930,7 +935,7 @@ Calculate log loss for validation data set
 
 ``` r
 val_predictions = predict(lasso_log_reg, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -972,7 +977,7 @@ train_control <- trainControl(method = "cv",
                               number = 5)
 set.seed(1122)
 tree_model <- train(Diabetes_binary_transformed ~ ., 
-                data = dplyr::select(train_data, -Diabetes_binary), 
+                data = select(train_data, -Diabetes_binary), 
                 method = "rpart",
                 trControl = train_control,
                 metric="logLoss",
@@ -1027,7 +1032,7 @@ Calculate log loss for validation data set
 
 ``` r
 val_predictions = predict(tree_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
@@ -1107,7 +1112,7 @@ rf_model = train(
                                 HeartDiseaseorAttack+
                                 Age+
                                 Income,
-  data = dplyr::select(train_data, -Diabetes_binary),
+  data = select(train_data, -Diabetes_binary),
   method = "rf",
   metric="logLoss",
   tuneGrid = data.frame(mtry = c(1:4)), 
@@ -1133,7 +1138,8 @@ Obtain log loss for train data set
 
 ``` r
 models_performace_train[["random_forest"]] = min(rf_model$results$logLoss)
-print(paste("Log Loss for random forest model for training dataset:", models_performace_train[["random_forest"]]))
+print(paste("Log Loss for random forest model for training dataset:", 
+            models_performace_train[["random_forest"]]))
 ```
 
     ## [1] "Log Loss for random forest model for training dataset: 1.38750176495771"
@@ -1142,24 +1148,22 @@ Calculate log loss for validation data set
 
 ``` r
 val_predictions = predict(rf_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary), 
+                             newdata = val_data %>% select(-Diabetes_binary), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_rf = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss:", log_loss_val_rf))
+print(paste("Log Loss for random forest model for validation dataset", 
+            log_loss_val_rf))
 ```
 
-    ## [1] "Log Loss: 15.4276003413627"
+    ## [1] "Log Loss for random forest model for validation dataset 15.4276003413627"
 
 ``` r
 models_performace_val[["random_forest"]] = log_loss_val_rf
-log_loss_val_rf
 ```
-
-    ## [1] 15.4276
 
 ## 5.6 New model - Support Vector Machine
 
@@ -1207,24 +1211,25 @@ train_control = trainControl(
 )
 
 #svm_grid = expand.grid(
-#  sigma = c(0.01, 0.1, 1),   # Range of sigma values for the RBF kernel
-#  C = c(0.1, 1, 10)          # Range of C values for regularization
+#  sigma = c(0.01, 0.1, 1), 
+#  C = c(0.1, 1, 10)
 #)
 
-
+# limiting number of hyperparameters due to the
+# performance issues
 svm_grid = expand.grid(
-  sigma = c(0.1),   # Range of sigma values for the RBF kernel
-  C = c(1, 10)          # Range of C values for regularization
+  sigma = c(0.1),
+  C = c(1, 10)
 )
 
-# limiting number of features due to performance 
-# issues of the algorithm 
+# limiting number of features due to the performance 
+# issues
 svm_model = train(
   #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth,
-  data = dplyr::select(train_data, -Diabetes_binary),
+  data = select(train_data, -Diabetes_binary),
   method = "svmRadial",
   trControl = train_control,
   metric="logLoss",
@@ -1264,14 +1269,15 @@ Calculate log loss for validation dataset.
 
 ``` r
 val_predictions = predict(svm_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(val_data$Diabetes_binary))
 
 log_loss_val_svm = calculateLogLoss(predicted_prob_class1, true_labels)
-print(paste("Log Loss for support vector machine model for validation dataset", log_loss_val_svm))
+print(paste("Log Loss for support vector machine model for validation dataset", 
+            log_loss_val_svm))
 ```
 
     ## [1] "Log Loss for support vector machine model for validation dataset 1.52153712349422"
@@ -1314,7 +1320,7 @@ nb_grid <- expand.grid(
 
 nb_model = train(
   Diabetes_binary_transformed ~ ., 
-  data = dplyr::select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
+  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
   method = "nb",
   trControl = train_control,
   tuneGrid = nb_grid,
@@ -1349,7 +1355,7 @@ Calculate log loss for validation dataset.
 
 ``` r
 val_predictions = predict(nb_model, 
-                             newdata = val_data %>% dplyr::select(-Diabetes_binary_transformed), 
+                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
 
 predicted_prob_class1 = val_predictions[, 1]
