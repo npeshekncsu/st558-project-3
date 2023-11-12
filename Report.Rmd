@@ -854,10 +854,30 @@ nb_grid <- expand.grid(
   fL = 1,
   adjust = seq(0.5, 1.5, by = 0.5)
 )
-
+#updated
+tranformed_train_data <- train_data %>%
+  mutate(BMI_quartiles = case_when(
+    BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
+    BMI > quantile(train_data$BMI)[[1]] & BMI <= quantile(train_data$BMI)[[2]] ~ "Q2",
+    BMI > quantile(train_data$BMI)[[2]] & BMI <= quantile(train_data$BMI)[[3]] ~ "Q3",
+    BMI > quantile(train_data$BMI)[[3]] ~ "Q4"
+  )) %>% mutate(BMI_quartiles = as.factor(BMI_quartiles))
+#updated
+tranformed_val_data <- val_data %>%
+  mutate(BMI_quartiles = case_when(
+    BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
+    BMI > quantile(train_data$BMI)[[1]] & BMI <= quantile(train_data$BMI)[[2]] ~ "Q2",
+    BMI > quantile(train_data$BMI)[[2]] & BMI <= quantile(train_data$BMI)[[3]] ~ "Q3",
+    BMI > quantile(train_data$BMI)[[3]] ~ "Q4"
+  )) %>% mutate(BMI_quartiles = as.factor(BMI_quartiles))
+# Limiting number of features due to the performance 
+# issues. Ideally, we should try to use all predictors: Diabetes_binary_transformed ~ .
 nb_model = train(
-  Diabetes_binary_transformed ~ ., 
-  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
+  Diabetes_binary_transformed ~ HighBP +
+                                BMI_quartiles +
+                                Age + 
+                                PhysActivity, 
+  data = select(tranformed_train_data, -Diabetes_binary),
   method = "nb",
   trControl = train_control,
   tuneGrid = nb_grid,
@@ -885,12 +905,13 @@ print(paste("Log Loss for naive bayes model for training dataset",
 Calculate log loss for validation dataset.
 
 ```{r}
+#updated
 val_predictions = predict(nb_model, 
-                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = tranformed_val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
-
+#updated
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
+true_labels = as.integer(as.character(tranformed_val_data$Diabetes_binary))
 
 log_loss_val_nb = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss for naive bayes model for validation dataset", 
