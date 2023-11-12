@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-10
+2023-11-11
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -489,14 +489,6 @@ trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7,
                                   times = 1)
 train_data = subset[trainIndex, ]
 val_data = subset[-trainIndex, ]
-
-
-#Taking sample TEMPORARY. 
-#Will be removed
-#Having performance issues and not able to render for original sizes. 
-#TODO: remove the following lines
-#train_data <- train_data[sample(nrow(train_data), size = 500), ]
-#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 ## 5.1 Log loss
@@ -880,8 +872,9 @@ train.control = trainControl(method = "cv",
 
 set.seed(2)
 
-# Limiting number of features due to performance issues
-lasso_log_reg<-train(#Diabetes_binary ~., 
+# Limiting number of features due to performance issues.
+# Ideally, we should try to use all available predictors Diabetes_binary ~.
+lasso_log_reg<-train(
                    Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
                    data = select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
@@ -1106,11 +1099,11 @@ train_control <- trainControl(
   classProbs = TRUE
 )
 
-# limiting number of the features due 
-# to performance issues with random forest algorithm
+# Limiting number of the features due 
+# to performance issues with random forest algorithm.
+# Ideally we should try to use all features:  Diabetes_binary_transformed ~ ., 
 set.seed(11)
 rf_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth+
@@ -1215,11 +1208,6 @@ train_control = trainControl(
   summaryFunction=mnLogLoss
 )
 
-#svm_grid = expand.grid(
-#  sigma = c(0.01, 0.1, 1), 
-#  C = c(0.1, 1, 10)
-#)
-
 # limiting number of hyperparameters due to the
 # performance issues
 svm_grid = expand.grid(
@@ -1227,10 +1215,9 @@ svm_grid = expand.grid(
   C = c(1, 10)
 )
 
-# limiting number of features due to the performance 
-# issues
+# Limiting number of features due to the performance 
+# issues. Ideally, we should try to use all predictors: Diabetes_binary_transformed ~ .
 svm_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth,

@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-10
+2023-11-11
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -123,16 +123,17 @@ head(data)
 ```
 
     ## # A tibble: 6 × 22
-    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies HvyAlcoholConsump AnyHealthcare
-    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>             <dbl>         <dbl>
-    ## 1               0      1        1         1    40      1      0                    0            0      0       1                 0             1
-    ## 2               0      0        0         0    25      1      0                    0            1      0       0                 0             0
-    ## 3               0      1        1         1    28      0      0                    0            0      1       0                 0             1
-    ## 4               0      1        0         1    27      0      0                    0            1      1       1                 0             1
-    ## 5               0      1        1         1    24      0      0                    0            1      1       1                 0             1
-    ## 6               0      1        1         1    25      1      0                    0            1      1       1                 0             1
-    ## # ℹ 9 more variables: NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>, PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>, Age <dbl>, Education <dbl>,
-    ## #   Income <dbl>
+    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity
+    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>
+    ## 1               0      1        1         1    40      1      0                    0            0
+    ## 2               0      0        0         0    25      1      0                    0            1
+    ## 3               0      1        1         1    28      0      0                    0            0
+    ## 4               0      1        0         1    27      0      0                    0            1
+    ## 5               0      1        1         1    24      0      0                    0            1
+    ## 6               0      1        1         1    25      1      0                    0            1
+    ## # ℹ 13 more variables: Fruits <dbl>, Veggies <dbl>, HvyAlcoholConsump <dbl>, AnyHealthcare <dbl>,
+    ## #   NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>, PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>,
+    ## #   Age <dbl>, Education <dbl>, Income <dbl>
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -261,13 +262,17 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 ```
 
     ##            
-    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74
-    ##   No diabet        1371         3766         5504         6863         7905         9029        10100        11171        12433        11850         7648
-    ##   Diabet             15           40          103          179          337          486          882         1120         1742         2163         1587
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49
+    ##   No diabet        1371         3766         5504         6863         7905         9029
+    ##   Diabet             15           40          103          179          337          486
     ##            
-    ##             Age 75 to 79 Age 80 or older
-    ##   No diabet         4516            4769
-    ##   Diabet             905             841
+    ##             Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79
+    ##   No diabet        10100        11171        12433        11850         7648         4516
+    ##   Diabet             882         1120         1742         2163         1587          905
+    ##            
+    ##             Age 80 or older
+    ##   No diabet            4769
+    ##   Diabet                841
 
 Let’s check if number of cases with Diabetes and without Diabetes are
 equal for males and females for the selected subset of data.
@@ -484,14 +489,6 @@ trainIndex <- createDataPartition(subset$Diabetes_binary, p = .7,
                                   times = 1)
 train_data = subset[trainIndex, ]
 val_data = subset[-trainIndex, ]
-
-
-#Taking sample TEMPORARY. 
-#Will be removed
-#Having performance issues and not able to render for original sizes. 
-#TODO: remove the following lines
-#train_data <- train_data[sample(nrow(train_data), size = 500), ]
-#val_data <- val_data[sample(nrow(val_data), size = 200), ]
 ```
 
 ## 5.1 Log loss
@@ -875,8 +872,9 @@ train.control = trainControl(method = "cv",
 
 set.seed(2)
 
-# Limiting number of features due to performance issues
-lasso_log_reg<-train(#Diabetes_binary ~., 
+# Limiting number of features due to performance issues.
+# Ideally, we should try to use all available predictors Diabetes_binary ~.
+lasso_log_reg<-train(
                    Diabetes_binary ~ HighBP + HighChol + BMI + Smoker + AnyHealthcare + GenHlth + Age + Sex,
                    data = select(train_data, -Diabetes_binary_transformed),
                    method = 'glmnet',
@@ -1101,11 +1099,11 @@ train_control <- trainControl(
   classProbs = TRUE
 )
 
-# limiting number of the features due 
-# to performance issues with random forest algorithm
+# Limiting number of the features due 
+# to performance issues with random forest algorithm.
+# Ideally we should try to use all features:  Diabetes_binary_transformed ~ ., 
 set.seed(11)
 rf_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth+
@@ -1210,11 +1208,6 @@ train_control = trainControl(
   summaryFunction=mnLogLoss
 )
 
-#svm_grid = expand.grid(
-#  sigma = c(0.01, 0.1, 1), 
-#  C = c(0.1, 1, 10)
-#)
-
 # limiting number of hyperparameters due to the
 # performance issues
 svm_grid = expand.grid(
@@ -1222,10 +1215,9 @@ svm_grid = expand.grid(
   C = c(1, 10)
 )
 
-# limiting number of features due to the performance 
-# issues
+# Limiting number of features due to the performance 
+# issues. Ideally, we should try to use all predictors: Diabetes_binary_transformed ~ .
 svm_model = train(
-  #Diabetes_binary_transformed ~ ., 
   Diabetes_binary_transformed ~ HighChol+
                                 BMI + 
                                 GenHlth,
