@@ -1,7 +1,7 @@
 ST558, Project3
 ================
 Jacob Press, Nataliya Peshekhodko
-2023-11-11
+2023-11-12
 
 - <a href="#1-introduction" id="toc-1-introduction">1 Introduction</a>
 - <a href="#2-packages" id="toc-2-packages">2 Packages</a>
@@ -123,17 +123,16 @@ head(data)
 ```
 
     ## # A tibble: 6 × 22
-    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity
-    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>
-    ## 1               0      1        1         1    40      1      0                    0            0
-    ## 2               0      0        0         0    25      1      0                    0            1
-    ## 3               0      1        1         1    28      0      0                    0            0
-    ## 4               0      1        0         1    27      0      0                    0            1
-    ## 5               0      1        1         1    24      0      0                    0            1
-    ## 6               0      1        1         1    25      1      0                    0            1
-    ## # ℹ 13 more variables: Fruits <dbl>, Veggies <dbl>, HvyAlcoholConsump <dbl>, AnyHealthcare <dbl>,
-    ## #   NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>, PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>,
-    ## #   Age <dbl>, Education <dbl>, Income <dbl>
+    ##   Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity Fruits Veggies
+    ##             <dbl>  <dbl>    <dbl>     <dbl> <dbl>  <dbl>  <dbl>                <dbl>        <dbl>  <dbl>   <dbl>
+    ## 1               0      1        1         1    40      1      0                    0            0      0       1
+    ## 2               0      0        0         0    25      1      0                    0            1      0       0
+    ## 3               0      1        1         1    28      0      0                    0            0      1       0
+    ## 4               0      1        0         1    27      0      0                    0            1      1       1
+    ## 5               0      1        1         1    24      0      0                    0            1      1       1
+    ## 6               0      1        1         1    25      1      0                    0            1      1       1
+    ## # ℹ 11 more variables: HvyAlcoholConsump <dbl>, AnyHealthcare <dbl>, NoDocbcCost <dbl>, GenHlth <dbl>, MentHlth <dbl>,
+    ## #   PhysHlth <dbl>, DiffWalk <dbl>, Sex <dbl>, Age <dbl>, Education <dbl>, Income <dbl>
 
 Combine Education levels `1` and `2` into one level `12`
 
@@ -262,17 +261,13 @@ table(factor(subset$Diabetes_binary, labels = c("No diabet", "Diabet")),
 ```
 
     ##            
-    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49
-    ##   No diabet         189          182          350          380          445          504
-    ##   Diabet              4           10           23           38           71          115
+    ##             Age 18 - 24 Age 25 to 29 Age 30 to 34 Age 35 to 39 Age 40 to 44 Age 45 to 49 Age 50 to 54 Age 55 to 59
+    ##   No diabet         189          182          350          380          445          504          766          795
+    ##   Diabet              4           10           23           38           71          115          209          292
     ##            
-    ##             Age 50 to 54 Age 55 to 59 Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79
-    ##   No diabet          766          795          713          702          740          639
-    ##   Diabet             209          292          321          320          354          273
-    ##            
-    ##             Age 80 or older
-    ##   No diabet             777
-    ##   Diabet                266
+    ##             Age 60 to 64 Age 65 to 69 Age 70 to 74 Age 75 to 79 Age 80 or older
+    ##   No diabet          713          702          740          639             777
+    ##   Diabet             321          320          354          273             266
 
 Let’s check if number of cases with Diabetes and without Diabetes are
 equal for males and females for the selected subset of data.
@@ -1310,9 +1305,29 @@ nb_grid <- expand.grid(
   adjust = seq(0.5, 1.5, by = 0.5)
 )
 
+tranformed_train_data <- train_data %>%
+  mutate(BMI_quartiles = case_when(
+    BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
+    BMI > quantile(train_data$BMI)[[1]] & BMI <= quantile(train_data$BMI)[[2]] ~ "Q2",
+    BMI > quantile(train_data$BMI)[[2]] & BMI <= quantile(train_data$BMI)[[3]] ~ "Q3",
+    BMI > quantile(train_data$BMI)[[3]] ~ "Q4"
+  )) %>% mutate(BMI_quartiles = as.factor(BMI_quartiles))
+
+tranformed_val_data <- val_data %>%
+  mutate(BMI_quartiles = case_when(
+    BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
+    BMI > quantile(train_data$BMI)[[1]] & BMI <= quantile(train_data$BMI)[[2]] ~ "Q2",
+    BMI > quantile(train_data$BMI)[[2]] & BMI <= quantile(train_data$BMI)[[3]] ~ "Q3",
+    BMI > quantile(train_data$BMI)[[3]] ~ "Q4"
+  )) %>% mutate(BMI_quartiles = as.factor(BMI_quartiles))
+# Limiting number of features due to the performance 
+# issues. Ideally, we should try to use all predictors: Diabetes_binary_transformed ~ .
 nb_model = train(
-  Diabetes_binary_transformed ~ ., 
-  data = select(train_data, -MentHlth, -PhysHlth, -Diabetes_binary),
+  Diabetes_binary_transformed ~ HighBP +
+                                BMI_quartiles +
+                                Age + 
+                                PhysActivity, 
+  data = select(tranformed_train_data, -Diabetes_binary),
   method = "nb",
   trControl = train_control,
   tuneGrid = nb_grid,
@@ -1322,10 +1337,10 @@ nb_model = train(
 nb_model$results
 ```
 
-    ##   usekernel fL adjust  logLoss  logLossSD
-    ## 1      TRUE  1    0.5 1.090550 0.04115779
-    ## 2      TRUE  1    1.0 1.088135 0.03854765
-    ## 3      TRUE  1    1.5 1.088201 0.04068340
+    ##   usekernel fL adjust   logLoss  logLossSD
+    ## 1      TRUE  1    0.5 0.5474579 0.01638066
+    ## 2      TRUE  1    1.0 0.5467799 0.01574241
+    ## 3      TRUE  1    1.5 0.5464479 0.01580385
 
 ``` r
 plot(nb_model)
@@ -1341,24 +1356,23 @@ print(paste("Log Loss for naive bayes model for training dataset",
             models_performace_train[["Naive Bayes"]]))
 ```
 
-    ## [1] "Log Loss for naive bayes model for training dataset 1.08813546263686"
+    ## [1] "Log Loss for naive bayes model for training dataset 0.546447938613305"
 
 Calculate log loss for validation dataset.
 
 ``` r
 val_predictions = predict(nb_model, 
-                             newdata = val_data %>% select(-Diabetes_binary_transformed), 
+                             newdata = tranformed_val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
-
 predicted_prob_class1 = val_predictions[, 1]
-true_labels = as.integer(as.character(val_data$Diabetes_binary))
+true_labels = as.integer(as.character(tranformed_val_data$Diabetes_binary))
 
 log_loss_val_nb = calculateLogLoss(predicted_prob_class1, true_labels)
 print(paste("Log Loss for naive bayes model for validation dataset", 
             log_loss_val_nb))
 ```
 
-    ## [1] "Log Loss for naive bayes model for validation dataset 5.02449132528398"
+    ## [1] "Log Loss for naive bayes model for validation dataset 2.20879149760994"
 
 ``` r
 models_performace_val[["Naive Bayes"]] = log_loss_val_nb
@@ -1386,7 +1400,7 @@ models_performace_train
     ## [1] 0.5361045
     ## 
     ## $`Naive Bayes`
-    ## [1] 1.088135
+    ## [1] 0.5464479
 
 All models performance on validation dataset based on `log loss` metric:
 
@@ -1410,7 +1424,7 @@ models_performace_val
     ## [1] 1.204419
     ## 
     ## $`Naive Bayes`
-    ## [1] 5.024491
+    ## [1] 2.208791
 
 The best performed model based on train data set is
 **logistic_regression_model**.
