@@ -854,7 +854,7 @@ nb_grid <- expand.grid(
   fL = 1,
   adjust = seq(0.5, 1.5, by = 0.5)
 )
-#updated
+
 tranformed_train_data <- train_data %>%
   mutate(BMI_quartiles = case_when(
     BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
@@ -862,7 +862,7 @@ tranformed_train_data <- train_data %>%
     BMI > quantile(train_data$BMI)[[2]] & BMI <= quantile(train_data$BMI)[[3]] ~ "Q3",
     BMI > quantile(train_data$BMI)[[3]] ~ "Q4"
   )) %>% mutate(BMI_quartiles = as.factor(BMI_quartiles))
-#updated
+
 tranformed_val_data <- val_data %>%
   mutate(BMI_quartiles = case_when(
     BMI <= quantile(train_data$BMI)[[1]] ~ "Q1",
@@ -905,11 +905,9 @@ print(paste("Log Loss for naive bayes model for training dataset",
 Calculate log loss for validation dataset.
 
 ```{r}
-#updated
 val_predictions = predict(nb_model, 
                              newdata = tranformed_val_data %>% select(-Diabetes_binary_transformed), 
                              type = "prob")
-#updated
 predicted_prob_class1 = val_predictions[, 1]
 true_labels = as.integer(as.character(tranformed_val_data$Diabetes_binary))
 
